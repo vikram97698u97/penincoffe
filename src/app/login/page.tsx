@@ -24,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
 
     if (!isFirebaseConfigured || auth?.name === 'dummy_auth') {
-      setError("Live Firebase API Keys not detected on this live server (using dummy_api_key). Please click 'Quick Demo Login (Bypass Auth)' below to enter the dashboard right now!");
+      setError("Live Firebase API Keys not detected on this server. Please verify your environment variables (`NEXT_PUBLIC_FIREBASE_API_KEY`, etc.) in your hosting settings.");
       setLoading(false);
       return;
     }
@@ -38,13 +38,13 @@ export default function LoginPage() {
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         setError('Invalid email or password. Please verify your admin credentials in the Firebase Console.');
       } else if (err?.code?.includes('api-key') || err?.message?.includes('dummy_api_key')) {
-        setError("Firebase API Key (.env.local) is not set up or set to 'dummy_api_key'. Click 'Quick Demo Login (Bypass Auth)' below to enter the dashboard right now!");
+        setError('Firebase API Key is not configured on this server. Please check your environment variables.');
       } else if (err.code === 'auth/too-many-requests') {
         setError('Too many failed login attempts. Please try again later or use Forgot Password.');
       } else if (err.code === 'auth/network-request-failed') {
         setError('Network connection error. Please check your internet connection and try again.');
       } else {
-        setError('Firebase Auth notice: ' + (err?.code || 'Invalid credentials') + ". Click 'Quick Demo Login' below to bypass.");
+        setError('Authentication error: ' + (err?.code || 'Invalid credentials'));
       }
     } finally {
       setLoading(false);
@@ -85,14 +85,6 @@ export default function LoginPage() {
     } finally {
       setResetLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    setError('');
-    setSuccess('Entering demo/local mode...');
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 500);
   };
 
   return (
@@ -174,22 +166,6 @@ export default function LoginPage() {
                   className="w-full bg-coffee-dark text-cream-light hover:bg-coffee-light transition-colors py-3 rounded text-xs uppercase font-bold tracking-wider disabled:opacity-50"
                 >
                   {loading ? 'Authenticating...' : 'Sign In with Firebase'}
-                </button>
-
-                <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t border-coffee-light/15"></div>
-                  <span className="flex-shrink mx-3 text-[10px] uppercase font-bold tracking-widest text-coffee-light/70">
-                    Or Local / Dev Mode
-                  </span>
-                  <div className="flex-grow border-t border-coffee-light/15"></div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleDemoLogin}
-                  className="w-full bg-cream-light text-coffee-dark border border-coffee-light/30 hover:bg-terracotta/10 hover:border-terracotta transition-colors py-2.5 rounded text-xs uppercase font-bold tracking-wider"
-                >
-                  Quick Demo Login (Bypass Auth)
                 </button>
               </div>
             </form>
