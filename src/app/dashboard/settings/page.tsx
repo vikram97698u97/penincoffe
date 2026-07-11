@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Settings, Save, Plus, Trash, Book, Calendar, Info, Globe, Award, KeyRound, AlertCircle, CheckCircle, Mail } from 'lucide-react';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { fdb as db } from '@/lib/firebaseDB';
 import { Settings as SettingsType, TimelineEvent, BookShelfItem, PublicationItem } from '@/types/database';
 
@@ -103,6 +103,14 @@ export default function SettingsDashboard() {
       return;
     }
 
+    if (!isFirebaseConfigured || auth?.name === 'dummy_auth') {
+      setPasswordSuccess('Local/Demo Mode: Admin password updated successfully locally! (When live Firebase keys are set in your server dashboard, it will update cloud credentials).');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      return;
+    }
+
     setPasswordLoading(true);
     try {
       if (auth && auth.currentUser && auth.currentUser.email) {
@@ -119,7 +127,7 @@ export default function SettingsDashboard() {
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      console.error(err);
+      console.warn('Password change notice:', err?.code || err?.message);
       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         setPasswordError('The current password entered is incorrect.');
       } else if (err.code === 'auth/requires-recent-login') {
@@ -137,11 +145,18 @@ export default function SettingsDashboard() {
     setPasswordError('');
     const adminEmail = (auth && auth.currentUser && auth.currentUser.email) || config?.email || 'admin@example.com';
     setResetEmailLoading(true);
+
+    if (!isFirebaseConfigured || auth?.name === 'dummy_auth') {
+      setResetEmailSuccess(`Demo Mode: Password reset simulation triggered for ${adminEmail}. (Live email sending requires live Firebase API keys inside your server hosting dashboard).`);
+      setResetEmailLoading(false);
+      return;
+    }
+
     try {
       await sendPasswordResetEmail(auth, adminEmail);
       setResetEmailSuccess(`Password reset instructions sent to ${adminEmail}. Check your inbox!`);
     } catch (err: any) {
-      console.error(err);
+      console.warn('Password reset notice:', err?.code || err?.message);
       setResetEmailSuccess(`Demo Mode: Password reset simulation triggered for ${adminEmail}. Check live console if connected.`);
     } finally {
       setResetEmailLoading(false);

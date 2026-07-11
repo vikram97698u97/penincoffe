@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { Coffee, AlertCircle, CheckCircle, KeyRound, ArrowLeft } from 'lucide-react';
 import Footer from '@/components/Footer';
 
@@ -22,6 +22,12 @@ export default function LoginPage() {
     setError('');
     setSuccess('');
     setLoading(true);
+
+    if (!isFirebaseConfigured || auth?.name === 'dummy_auth') {
+      setError("Live Firebase API Keys not detected on this live server (using dummy_api_key). Please click 'Quick Demo Login (Bypass Auth)' below to enter the dashboard right now!");
+      setLoading(false);
+      return;
+    }
 
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
@@ -54,6 +60,12 @@ export default function LoginPage() {
     setError('');
     setSuccess('');
     setResetLoading(true);
+
+    if (!isFirebaseConfigured || auth?.name === 'dummy_auth') {
+      setSuccess(`Demo Mode: Password reset simulation triggered for ${email.trim()}. (Live email recovery requires setting real Firebase keys in your live hosting dashboard).`);
+      setResetLoading(false);
+      return;
+    }
 
     try {
       await sendPasswordResetEmail(auth, email.trim());

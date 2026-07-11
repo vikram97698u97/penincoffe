@@ -15,5 +15,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// Check if we have valid live keys or if we are using dummy keys
+export const isFirebaseConfigured = firebaseConfig.apiKey !== "dummy_api_key" && !firebaseConfig.apiKey.includes("dummy");
+
+// Only initialize getAuth if API keys are real, or on server-side where iframe.js is not spawned.
+// This prevents the browser from loading iframe.js and throwing 400 Bad Request (auth/api-key-not-valid) on page load.
+export const auth = (typeof window !== "undefined" && !isFirebaseConfigured)
+  ? ({ currentUser: null, name: 'dummy_auth' } as any)
+  : getAuth(app);
+
 export const database = getDatabase(app);
