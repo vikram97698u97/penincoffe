@@ -31,12 +31,14 @@ export default function LoginPage() {
       console.warn('Authentication Notice:', err?.code || err?.message);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         setError('Invalid email or password. Please verify your admin credentials in the Firebase Console.');
+      } else if (err?.code?.includes('api-key') || err?.message?.includes('dummy_api_key')) {
+        setError("Firebase API Key (.env.local) is not set up or set to 'dummy_api_key'. Click 'Quick Demo Login (Bypass Auth)' below to enter the dashboard right now!");
       } else if (err.code === 'auth/too-many-requests') {
         setError('Too many failed login attempts. Please try again later or use Forgot Password.');
       } else if (err.code === 'auth/network-request-failed') {
         setError('Network connection error. Please check your internet connection and try again.');
       } else {
-        setError('Invalid credentials or Firebase Auth error. Try Demo Login below.');
+        setError('Firebase Auth notice: ' + (err?.code || 'Invalid credentials') + ". Click 'Quick Demo Login' below to bypass.");
       }
     } finally {
       setLoading(false);
@@ -63,6 +65,8 @@ export default function LoginPage() {
         setError('No account found with this email address.');
       } else if (err.code === 'auth/invalid-email') {
         setError('Please enter a valid email address.');
+      } else if (err?.code?.includes('api-key') || err?.message?.includes('dummy_api_key')) {
+        setSuccess(`Demo Mode: Password reset simulation triggered for ${email.trim()}. (Live email sending requires real Firebase API keys in .env.local).`);
       } else {
         setSuccess(`Demo/Local Mode: Password reset simulation triggered for ${email.trim()}. Check live Firebase console if connected.`);
       }
