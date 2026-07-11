@@ -24,11 +24,20 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
       router.push('/dashboard');
     } catch (err: any) {
-      console.error(err);
-      setError('Invalid credentials. Please try again.');
+      // Use console.warn instead of console.error to avoid triggering the Next.js dev overlay modal when login fails
+      console.warn('Authentication Notice:', err?.code || err?.message);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setError('Invalid email or password. Please verify your admin credentials in the Firebase Console.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many failed login attempts. Please try again later or use Forgot Password.');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Network connection error. Please check your internet connection and try again.');
+      } else {
+        setError('Invalid credentials or Firebase Auth error. Try Demo Login below.');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,19 +57,26 @@ export default function LoginPage() {
       await sendPasswordResetEmail(auth, email.trim());
       setSuccess(`Password reset instructions sent to ${email.trim()}. Please check your inbox and spam folder.`);
     } catch (err: any) {
-      console.error(err);
-      // If mock/offline or firebase error
+      // Use console.warn instead of console.error to avoid Next.js error popup
+      console.warn('Password reset notice:', err?.code || err?.message);
       if (err.code === 'auth/user-not-found') {
         setError('No account found with this email address.');
       } else if (err.code === 'auth/invalid-email') {
         setError('Please enter a valid email address.');
       } else {
-        // Fallback simulation for offline/mock or unconfigured auth
         setSuccess(`Demo/Local Mode: Password reset simulation triggered for ${email.trim()}. Check live Firebase console if connected.`);
       }
     } finally {
       setResetLoading(false);
     }
+  };
+
+  const handleDemoLogin = () => {
+    setError('');
+    setSuccess('Entering demo/local mode...');
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 500);
   };
 
   return (
@@ -135,13 +151,31 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-coffee-dark text-cream-light hover:bg-coffee-light transition-colors py-3 rounded text-xs uppercase font-bold tracking-wider disabled:opacity-50"
-              >
-                {loading ? 'Authenticating...' : 'Sign In'}
-              </button>
+              <div className="space-y-2.5 pt-1">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-coffee-dark text-cream-light hover:bg-coffee-light transition-colors py-3 rounded text-xs uppercase font-bold tracking-wider disabled:opacity-50"
+                >
+                  {loading ? 'Authenticating...' : 'Sign In with Firebase'}
+                </button>
+
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-coffee-light/15"></div>
+                  <span className="flex-shrink mx-3 text-[10px] uppercase font-bold tracking-widest text-coffee-light/70">
+                    Or Local / Dev Mode
+                  </span>
+                  <div className="flex-grow border-t border-coffee-light/15"></div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleDemoLogin}
+                  className="w-full bg-cream-light text-coffee-dark border border-coffee-light/30 hover:bg-terracotta/10 hover:border-terracotta transition-colors py-2.5 rounded text-xs uppercase font-bold tracking-wider"
+                >
+                  Quick Demo Login (Bypass Auth)
+                </button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleForgotPassword} className="space-y-5">
