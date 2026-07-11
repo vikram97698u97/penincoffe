@@ -73,7 +73,7 @@ export default function DashboardOverview() {
     { label: 'Newsletter Subs', value: stats.subscribers, icon: Mail, color: 'text-purple-600 bg-purple-50' },
     { label: 'Total Posts', value: stats.totalPosts, icon: FileText, color: 'text-amber-600 bg-amber-50' },
     { label: 'Stories', value: stats.stories, icon: Coffee, color: 'text-green-600 bg-green-50' },
-    { label: 'Poems', value: stats.poems, icon: FeatherIcon, color: 'text-pink-600 bg-pink-50' },
+    { label: 'Articles', value: (stats as any).articles || stats.poems, icon: FeatherIcon, color: 'text-pink-600 bg-pink-50' },
     { label: 'Weekly Brews', value: stats.weeklyBrews, icon: Mail, color: 'text-indigo-600 bg-indigo-50' },
     { label: 'Letters Received', value: stats.letters, icon: Heart, color: 'text-red-600 bg-red-50' },
     { label: 'Comments Left', value: stats.comments, icon: MessageSquare, color: 'text-teal-600 bg-teal-50' }

@@ -8,7 +8,7 @@ export interface User {
   updatedAt: string;
 }
 
-export type PostType = 'story' | 'poem' | 'book-note' | 'weekly-brew';
+export type PostType = 'story' | 'poem' | 'article' | 'book-note' | 'weekly-brew';
 
 export interface Post {
   id: string;
@@ -18,7 +18,7 @@ export interface Post {
   content: string;
   coverImage?: string;
   type: PostType;
-  category: string; // e.g., 'Literary Fiction', 'Romance', 'Love', 'Nature', 'Takeaways', 'Reading Wrap-Up'
+  category: string; // e.g., 'Technology', 'Lifestyle', 'Coffee', 'Business', 'Travel', 'Food', 'Guides', 'Reviews', 'Opinion', 'News'
   mood?: 'Love' | 'Loss' | 'Hope' | 'Nature' | 'Healing' | 'Reflection';
   tags: string[];
   readingTime: number; // in minutes
@@ -27,6 +27,12 @@ export interface Post {
   views: number;
   favorites: number;
   authorId: string;
+  authorName?: string;
+  status?: 'Draft' | 'Scheduled' | 'Published' | 'Archived';
+  scheduledDate?: string;
+  seoTitle?: string;
+  metaDescription?: string;
+  focusKeyword?: string;
   createdAt: string;
   updatedAt: string;
 }

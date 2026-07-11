@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPaths = [
     '',
     '/stories',
-    '/poetry',
+    '/articles',
     '/book-notes',
     '/weekly-brew',
     '/coffee-table',
@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = db.getPosts(false);
   const dynamicUrls = posts.map((post) => {
     let folder = 'stories';
-    if (post.type === 'poem') folder = 'poetry';
+    if (post.type === 'article' || post.type === 'poem') folder = 'articles';
     else if (post.type === 'book-note') folder = 'book-notes';
     else if (post.type === 'weekly-brew') folder = 'weekly-brew';
 

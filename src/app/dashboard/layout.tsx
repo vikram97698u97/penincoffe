@@ -55,7 +55,7 @@ export default function DashboardLayout({
     { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
     { href: '/dashboard/posts', label: 'All Posts', icon: FileText },
     { href: '/dashboard/stories', label: 'Stories', icon: PenTool },
-    { href: '/dashboard/poetry', label: 'Poetry', icon: Feather },
+    { href: '/dashboard/articles', label: 'Articles', icon: Feather },
     { href: '/dashboard/book-notes', label: 'Book Notes', icon: BookOpen },
     { href: '/dashboard/weekly-brew', label: 'Weekly Brews', icon: Mail },
     { href: '/dashboard/coffee-table', label: 'Coffee Table', icon: LayoutGrid },

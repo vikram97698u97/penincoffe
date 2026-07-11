@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Coffee, PenTool, BookOpen, Heart, ArrowRight, Star, MessageSquare } from 'lucide-react';
 import Footer from '@/components/Footer';
 import NewsletterForm from '@/components/NewsletterForm';
-import { PostCard, PoemCard, LetterCard, BookCard } from '@/components/ContentCards';
+import { PostCard, PoemCard, ArticleCard, LetterCard, BookCard } from '@/components/ContentCards';
 import { fdb as db } from '@/lib/firebaseDB';
 import { Post, Settings } from '@/types/database';
 
@@ -35,8 +35,8 @@ export default function Home() {
       const stories = posts.filter(p => p.type === 'story' && p.id !== featured?.id).slice(0, 3);
       setLatestStories(stories);
 
-      // Latest Poems
-      const poems = posts.filter(p => p.type === 'poem').slice(0, 3);
+      // Latest Articles
+      const poems = posts.filter(p => p.type === 'article' || p.type === 'poem').slice(0, 3);
       setLatestPoems(poems);
 
       // Latest Book Note
@@ -239,21 +239,23 @@ export default function Home() {
             )}
           </div>
 
-          {/* Latest Poems */}
+          {/* Latest Articles */}
           <div className="space-y-6">
             <div className="flex justify-between items-baseline border-b border-coffee-light/10 pb-3">
-              <h2 className="font-serif text-2xl font-bold">Latest Poetry</h2>
-              <Link href="/poetry" className="text-xs font-bold text-terracotta hover:underline">
-                View All Poetry →
+              <h2 className="font-serif text-2xl font-bold">Latest Articles</h2>
+              <Link href="/articles" className="text-xs font-bold text-terracotta hover:underline">
+                View All Articles →
               </Link>
             </div>
             <div className="space-y-6">
               {latestPoems.length === 0 ? (
-                <p className="text-sm font-serif italic text-coffee-light">No poems published yet.</p>
+                <p className="text-sm font-serif italic text-coffee-light">No articles published yet.</p>
               ) : (
-                latestPoems.map((poem) => (
-                  <PoemCard key={poem.id} poem={poem} />
-                ))
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {latestPoems.map((article) => (
+                    <ArticleCard key={article.id} article={article} />
+                  ))}
+                </div>
               )}
             </div>
           </div>

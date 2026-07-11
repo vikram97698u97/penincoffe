@@ -27,7 +27,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/stories', label: 'Stories' },
-    { href: '/poetry', label: 'Poetry' },
+    { href: '/articles', label: 'Articles' },
     { href: '/book-notes', label: 'Book Notes' },
     { href: '/weekly-brew', label: 'Weekly Brew' },
     { href: '/coffee-table', label: 'Coffee Table' },

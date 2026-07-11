@@ -93,7 +93,7 @@ export function PostCard({ post }: { post: Post }) {
 }
 
 // ----------------------------------------------------
-// POEM CARD (FOR POETRY LISTS)
+// POEM CARD (FOR POETRY LISTS & ARTICLES COMPAT)
 // ----------------------------------------------------
 export function PoemCard({ poem }: { poem: Post }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -108,17 +108,19 @@ export function PoemCard({ poem }: { poem: Post }) {
     }
   };
 
+  const isArticle = poem.type === 'article';
+  const targetRoute = isArticle ? `/articles/${poem.slug}` : `/poetry/${poem.slug}`;
+
   return (
     <article className="bg-cream-dark border border-coffee-light/10 p-8 rounded-lg vintage-border flex flex-col justify-between h-80 text-center relative group">
-      {/* Decorative top branch or details */}
       <div className="w-12 h-[1px] bg-coffee-light/30 mx-auto mb-4" />
 
       <div className="space-y-4 my-auto">
         <span className="text-[10px] uppercase tracking-widest text-coffee-light font-bold">
-          {poem.category}
+          {poem.category || 'Article'}
         </span>
         <h3 className="font-serif text-2xl font-bold tracking-tight text-coffee-dark group-hover:text-coffee-light transition-colors">
-          <Link href={`/poetry/${poem.slug}`}>{poem.title}</Link>
+          <Link href={targetRoute}>{poem.title}</Link>
         </h3>
         <p className="text-sm font-serif italic text-coffee-light/80 line-clamp-3 max-w-xs mx-auto">
           {poem.excerpt}
@@ -127,10 +129,10 @@ export function PoemCard({ poem }: { poem: Post }) {
 
       <div className="flex items-center justify-between border-t border-coffee-light/10 pt-4 mt-4 w-full">
         <Link
-          href={`/poetry/${poem.slug}`}
+          href={targetRoute}
           className="text-xs font-bold text-coffee-dark hover:text-terracotta uppercase tracking-wider transition-colors"
         >
-          Enter Poem →
+          {isArticle ? 'Read Article →' : 'Enter Poem →'}
         </Link>
         <div className="flex items-center gap-1">
           <button
@@ -142,6 +144,95 @@ export function PoemCard({ poem }: { poem: Post }) {
             <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
           </button>
           <span className="text-xs text-coffee-light">{likeCount}</span>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+// ----------------------------------------------------
+// ARTICLE CARD (FOR ARTICLES LISTING)
+// ----------------------------------------------------
+export function ArticleCard({ article }: { article: Post }) {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(article.favorites || 0);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!isLiked) {
+      await db.incrementFavorites(article.id, article.favorites || 0);
+      setLikeCount(prev => prev + 1);
+      setIsLiked(true);
+    }
+  };
+
+  return (
+    <article className="bg-cream-dark border border-coffee-light/15 rounded-xl overflow-hidden vintage-border flex flex-col justify-between group shadow-sm hover:shadow transition-shadow">
+      {article.coverImage ? (
+        <Link href={`/articles/${article.slug}`} className="block h-48 overflow-hidden relative">
+          <img
+            src={article.coverImage}
+            alt={article.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          {article.featured && (
+            <span className="absolute top-3 right-3 bg-terracotta text-cream-light text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded shadow">
+              ★ Featured
+            </span>
+          )}
+        </Link>
+      ) : (
+        article.featured && (
+          <div className="px-6 pt-5 pb-0 flex justify-end">
+            <span className="bg-terracotta text-cream-light text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded shadow">
+              ★ Featured
+            </span>
+          </div>
+        )
+      )}
+
+      <div className="p-6 space-y-3 flex-grow flex flex-col justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs text-coffee-light">
+            <span className="bg-cream-light border border-coffee-light/20 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider text-coffee-dark">
+              {article.category || 'Technology'}
+            </span>
+            <span className="font-mono text-[11px]">{article.readingTime || 3} min read</span>
+          </div>
+
+          <h3 className="font-serif text-xl font-bold tracking-tight text-coffee-dark group-hover:text-terracotta transition-colors leading-snug">
+            <Link href={`/articles/${article.slug}`}>{article.title}</Link>
+          </h3>
+
+          <p className="text-xs font-sans text-coffee-light line-clamp-3 leading-relaxed">
+            {article.excerpt}
+          </p>
+        </div>
+
+        <div className="pt-4 border-t border-coffee-light/10 flex items-center justify-between text-xs text-coffee-light">
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-coffee-dark">{article.authorName || 'Aria Vance'}</span>
+            <span>•</span>
+            <span className="font-mono text-[11px]">
+              {new Date(article.scheduledDate || article.createdAt).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleLike}
+              className={`p-1.5 rounded-full hover:bg-coffee-light/10 transition-colors ${
+                isLiked ? 'text-red-500' : 'text-coffee-light hover:text-coffee-dark'
+              }`}
+            >
+              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            </button>
+            <span className="text-xs font-mono">{likeCount}</span>
+          </div>
         </div>
       </div>
     </article>

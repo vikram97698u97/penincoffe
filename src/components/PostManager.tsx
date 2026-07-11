@@ -164,6 +164,7 @@ export default function PostManager({ filterType }: PostManagerProps) {
     if (filterType === 'all') return 'Posts';
     if (filterType === 'book-note') return 'Book Notes';
     if (filterType === 'weekly-brew') return 'Weekly Brews';
+    if (filterType === 'poem' || filterType === 'article') return 'Articles';
     return filterType.charAt(0).toUpperCase() + filterType.slice(1) + 's';
   };
 

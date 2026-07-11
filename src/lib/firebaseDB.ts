@@ -381,6 +381,7 @@ export const fdb = {
     totalPosts: number;
     stories: number;
     poems: number;
+    articles: number;
     bookNotes: number;
     weeklyBrews: number;
     subscribers: number;
@@ -397,7 +398,8 @@ export const fdb = {
     return {
       totalPosts: posts.length,
       stories: posts.filter(p => p.type === 'story').length,
-      poems: posts.filter(p => p.type === 'poem').length,
+      poems: posts.filter(p => p.type === 'poem' || p.type === 'article').length,
+      articles: posts.filter(p => p.type === 'article' || p.type === 'poem').length,
       bookNotes: posts.filter(p => p.type === 'book-note').length,
       weeklyBrews: posts.filter(p => p.type === 'weekly-brew').length,
       subscribers: subs.length,
