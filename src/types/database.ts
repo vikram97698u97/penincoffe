@@ -144,4 +144,9 @@ export interface Settings {
   featuredQuote?: string;
   whyStartedText?: string;
   publications?: PublicationItem[];
+  // New fields for redesigned Behind the Pen page
+  whatYouWillFindHere?: string;
+  beforeYouRead?: string;
+  writingRitual?: string;
+  myJourney?: string;
 }

@@ -41,6 +41,11 @@ export default function SettingsDashboard() {
   const [authorTagline, setAuthorTagline] = useState('');
   const [authorBlurb, setAuthorBlurb] = useState('');
   const [whyStartedText, setWhyStartedText] = useState('');
+  // New fields for redesigned Behind the Pen page
+  const [whatYouWillFindHere, setWhatYouWillFindHere] = useState('');
+  const [beforeYouRead, setBeforeYouRead] = useState('');
+  const [writingRitual, setWritingRitual] = useState('');
+  const [myJourney, setMyJourney] = useState('');
 
   // Timeline Helper States
   const [timeYear, setTimeYear] = useState('');
@@ -81,6 +86,10 @@ export default function SettingsDashboard() {
       setAuthorTagline(data.authorTagline || '');
       setAuthorBlurb(data.authorBlurb || '');
       setWhyStartedText(data.whyStartedText || '');
+      setWhatYouWillFindHere(data.whatYouWillFindHere || '');
+      setBeforeYouRead(data.beforeYouRead || '');
+      setWritingRitual(data.writingRitual || '');
+      setMyJourney(data.myJourney || '');
     }
     load();
   }, [refreshToggle]);
@@ -194,7 +203,11 @@ export default function SettingsDashboard() {
       authorImage,
       authorTagline,
       authorBlurb,
-      whyStartedText
+      whyStartedText,
+      whatYouWillFindHere,
+      beforeYouRead,
+      writingRitual,
+      myJourney
     } as SettingsType;
     await db.saveSettings(updated);
     alert('Biography and writing philosophy saved!');
@@ -526,12 +539,45 @@ export default function SettingsDashboard() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-coffee-light block">Why I Started Writing (Behind the pen page)</label>
+            <label className="text-[10px] uppercase font-bold text-coffee-light block">What You Will Find Here (Behind the pen page)</label>
             <textarea
-              rows={4}
-              required
-              value={whyStartedText}
-              onChange={(e) => setWhyStartedText(e.target.value)}
+              rows={3}
+              value={whatYouWillFindHere}
+              onChange={(e) => setWhatYouWillFindHere(e.target.value)}
+              placeholder="Welcome to a space where words are brewed slowly..."
+              className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark font-serif italic"
+            ></textarea>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-coffee-light block">Before You Read (Behind the pen page)</label>
+            <textarea
+              rows={3}
+              value={beforeYouRead}
+              onChange={(e) => setBeforeYouRead(e.target.value)}
+              placeholder="These pieces are meant to be savored..."
+              className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark font-serif italic"
+            ></textarea>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-coffee-light block">My Writing Ritual (Behind the pen page)</label>
+            <textarea
+              rows={3}
+              value={writingRitual}
+              onChange={(e) => setWritingRitual(e.target.value)}
+              placeholder="Every morning, I grind fresh beans..."
+              className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark font-serif italic"
+            ></textarea>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-coffee-light block">My Journey (Behind the pen page)</label>
+            <textarea
+              rows={3}
+              value={myJourney}
+              onChange={(e) => setMyJourney(e.target.value)}
+              placeholder="The path hasn't been linear..."
               className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark font-serif italic"
             ></textarea>
           </div>
