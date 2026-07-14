@@ -73,7 +73,7 @@ export default function StoryDetail({ params }: PageProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [mounted]);
 
-  if (!post) {
+  if (!mounted || !post) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">

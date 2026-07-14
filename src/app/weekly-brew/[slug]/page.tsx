@@ -38,7 +38,7 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
     loadData();
   }, [slug, mounted]);
 
-  if (!brew) {
+  if (!mounted || !brew) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">

@@ -48,7 +48,7 @@ export default function BookNoteDetail({ params }: PageProps) {
     loadData();
   }, [slug, mounted]);
 
-  if (!note) {
+  if (!mounted || !note) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">

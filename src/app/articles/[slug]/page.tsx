@@ -38,7 +38,7 @@ export default function ArticleDetail({ params }: PageProps) {
     loadData();
   }, [slug, mounted]);
 
-  if (!article) {
+  if (!mounted || !article) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
