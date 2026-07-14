@@ -50,9 +50,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${cormorant.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-cream-light text-coffee-dark font-sans selection:bg-cocoa-light selection:text-coffee-dark">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-cream-light text-coffee-dark font-sans selection:bg-cocoa-light selection:text-coffee-dark">
         <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
