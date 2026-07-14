@@ -79,7 +79,7 @@ export function PostCard({ post }: { post: Post }) {
         </div>
 
         {/* Title */}
-        <h3 className="font-serif text-xl font-bold leading-tight group-hover:text-coffee-light transition-colors">
+        <h3 className="font-serif text-xl font-bold leading-tight group-hover:text-terracotta transition-colors line-clamp-2 break-words">
           <Link href={`/${post.type === 'book-note' ? 'book-notes' : post.type === 'weekly-brew' ? 'weekly-brew' : 'stories'}/${post.slug}`}>
             {post.title}
           </Link>
@@ -145,7 +145,7 @@ export function PoemCard({ poem }: { poem: Post }) {
         <span className="text-[10px] uppercase tracking-widest text-coffee-light font-bold">
           {poem.category || 'Article'}
         </span>
-        <h3 className="font-serif text-2xl font-bold tracking-tight text-coffee-dark group-hover:text-coffee-light transition-colors">
+        <h3 className="font-serif text-2xl font-bold tracking-tight text-coffee-dark group-hover:text-terracotta transition-colors line-clamp-2 break-words">
           <Link href={targetRoute}>{poem.title}</Link>
         </h3>
         <p className="text-sm font-serif italic text-coffee-light/80 line-clamp-3 max-w-xs mx-auto">
@@ -243,7 +243,7 @@ export function ArticleCard({ article }: { article: Post }) {
             <span className="font-mono text-[11px]">{article.readingTime || 3} min read</span>
           </div>
 
-          <h3 className="font-serif text-xl font-bold tracking-tight text-coffee-dark group-hover:text-terracotta transition-colors leading-snug">
+          <h3 className="font-serif text-xl font-bold tracking-tight text-coffee-dark group-hover:text-terracotta transition-colors leading-snug line-clamp-2 break-words">
             <Link href={`/articles/${article.slug}`}>{article.title}</Link>
           </h3>
 
@@ -252,7 +252,7 @@ export function ArticleCard({ article }: { article: Post }) {
           </p>
         </div>
 
-        <div className="pt-4 border-t border-coffee-light/10 flex items-center justify-between text-xs text-coffee-light">
+        <div className="pt-4 border-t border-coffee-light/10 flex items-center justify-between text-xs text-coffee-light gap-2 flex-wrap">
           <div className="flex items-center gap-1.5">
             <span className="font-semibold text-coffee-dark">{article.authorName || 'Aria Vance'}</span>
             <span>•</span>

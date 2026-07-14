@@ -6,7 +6,8 @@ import { Coffee, PenTool, BookOpen, Heart, ArrowRight, Star, MessageSquare } fro
 import Footer from '@/components/Footer';
 import NewsletterForm from '@/components/NewsletterForm';
 import { PostCard, PoemCard, ArticleCard, LetterCard, BookCard } from '@/components/ContentCards';
-import { fdb as db } from '@/lib/firebaseDB';
+import { fdb } from '@/lib/firebaseDB';
+import { db as localDb } from '@/lib/db';
 import { Post, Settings } from '@/types/database';
 
 export default function Home() {
@@ -29,21 +30,35 @@ export default function Home() {
     if (!mounted) return;
     
     async function loadData() {
-      const fetchedSettings = await db.getSettings();
+      const fetchedSettings = await fdb.getSettings();
       setSettings(fetchedSettings);
 
-      const posts = await db.getPosts(false);
+      let firebasePosts: Post[] = [];
+      try {
+        firebasePosts = await fdb.getPosts(false);
+      } catch (err) {
+        console.warn('Failed to load firebase posts on client:', err);
+      }
+      const localPosts = localDb.getPosts(false);
+      const allPostsMap = new Map<string, Post>();
+      localPosts.forEach(p => p && allPostsMap.set(p.id, p));
+      firebasePosts.forEach(p => p && allPostsMap.set(p.id, p));
+      const posts = Array.from(allPostsMap.values()).filter(p => p && p.published);
+      posts.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       
       // Featured Story
       const featured = posts.find(p => p.featured && p.type === 'story') || posts.find(p => p.type === 'story') || null;
       setFeaturedPost(featured);
 
-      // Latest Stories (excluding featured)
-      const stories = posts.filter(p => p.type === 'story' && p.id !== featured?.id).slice(0, 3);
+      // Latest Stories (excluding featured if more stories exist, up to 4)
+      const storyCandidates = posts.filter(p => p.type === 'story' && p.id !== featured?.id);
+      const stories = storyCandidates.length > 0 
+        ? storyCandidates.slice(0, 4) 
+        : posts.filter(p => p.type === 'story').slice(0, 4);
       setLatestStories(stories);
 
-      // Latest Articles
-      const poems = posts.filter(p => p.type === 'article' || p.type === 'poem').slice(0, 3);
+      // Latest Articles & Poetry
+      const poems = posts.filter(p => p.type === 'article' || p.type === 'poem').slice(0, 4);
       setLatestPoems(poems);
 
       // Latest Book Note
@@ -55,13 +70,13 @@ export default function Home() {
       setLatestBrew(brews[0] || null);
 
       // Get an approved letter
-      const approvedLetters = await db.getLetters(false);
+      const approvedLetters = await fdb.getLetters(false);
       if (approvedLetters.length > 0) {
         setRandomLetter(approvedLetters[0]);
       }
 
       // Get coffee table items
-      const tableItems = await db.getCoffeeTable();
+      const tableItems = await fdb.getCoffeeTable();
       setCoffeeTableItems(tableItems.slice(0, 2));
 
       setLoading(false);
@@ -225,18 +240,21 @@ export default function Home() {
           </section>
         )}
 
-        {/* LATEST STORIES & POEMS */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* LATEST STORIES & ARTICLES */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Latest Stories */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex justify-between items-baseline border-b border-coffee-light/10 pb-3">
-              <h2 className="font-serif text-2xl font-bold">Latest Stories</h2>
-              <Link href="/stories" className="text-xs font-bold text-terracotta hover:underline">
+          <div className="space-y-6">
+            <div className="flex justify-between items-baseline border-b border-coffee-light/15 pb-3">
+              <h2 className="font-serif text-2xl font-bold text-coffee-dark">Latest Stories</h2>
+              <Link href="/stories" className="text-xs font-bold text-terracotta hover:underline uppercase tracking-wider">
                 View All Stories →
               </Link>
             </div>
             {latestStories.length === 0 ? (
-              <p className="text-sm font-serif italic text-coffee-light">No additional stories published yet.</p>
+              <div className="bg-cream-dark border border-coffee-light/15 rounded-xl p-8 text-center vintage-border space-y-2 shadow-sm">
+                <p className="text-sm font-serif italic text-coffee-light">No additional stories published yet.</p>
+                <Link href="/stories" className="text-xs font-bold text-terracotta hover:underline inline-block">Browse Story Archive →</Link>
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {latestStories.map((story) => (
@@ -248,23 +266,24 @@ export default function Home() {
 
           {/* Latest Articles */}
           <div className="space-y-6">
-            <div className="flex justify-between items-baseline border-b border-coffee-light/10 pb-3">
-              <h2 className="font-serif text-2xl font-bold">Latest Articles</h2>
-              <Link href="/articles" className="text-xs font-bold text-terracotta hover:underline">
+            <div className="flex justify-between items-baseline border-b border-coffee-light/15 pb-3">
+              <h2 className="font-serif text-2xl font-bold text-coffee-dark">Latest Articles</h2>
+              <Link href="/articles" className="text-xs font-bold text-terracotta hover:underline uppercase tracking-wider">
                 View All Articles →
               </Link>
             </div>
-            <div className="space-y-6">
-              {latestPoems.length === 0 ? (
+            {latestPoems.length === 0 ? (
+              <div className="bg-cream-dark border border-coffee-light/15 rounded-xl p-8 text-center vintage-border space-y-2 shadow-sm">
                 <p className="text-sm font-serif italic text-coffee-light">No articles published yet.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {latestPoems.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
-                  ))}
-                </div>
-              )}
-            </div>
+                <Link href="/articles" className="text-xs font-bold text-terracotta hover:underline inline-block">Explore Articles →</Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {latestPoems.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
