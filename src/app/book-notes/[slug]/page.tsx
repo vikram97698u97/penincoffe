@@ -22,8 +22,14 @@ export default function BookNoteDetail({ params }: PageProps) {
   const [relatedNotes, setRelatedNotes] = useState<Post[]>([]);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const found = await db.getPostBySlug(slug);
       if (found && found.type === 'book-note') {
@@ -40,7 +46,7 @@ export default function BookNoteDetail({ params }: PageProps) {
       }
     }
     loadData();
-  }, [slug]);
+  }, [slug, mounted]);
 
   if (!note) {
     return (

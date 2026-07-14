@@ -19,8 +19,14 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
   const [brew, setBrew] = useState<Post | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const found = await db.getPostBySlug(slug);
       if (found && found.type === 'weekly-brew') {
@@ -30,7 +36,7 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
       }
     }
     loadData();
-  }, [slug]);
+  }, [slug, mounted]);
 
   if (!brew) {
     return (

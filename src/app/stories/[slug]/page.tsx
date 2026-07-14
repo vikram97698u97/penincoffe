@@ -26,8 +26,14 @@ export default function StoryDetail({ params }: PageProps) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const foundPost = await db.getPostBySlug(slug);
       if (foundPost) {
@@ -50,10 +56,11 @@ export default function StoryDetail({ params }: PageProps) {
       }
     }
     loadData();
-  }, [slug]);
+  }, [slug, mounted]);
 
   // Scroll Progress Listener
   useEffect(() => {
+    if (!mounted) return;
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       if (totalHeight > 0) {
@@ -64,7 +71,7 @@ export default function StoryDetail({ params }: PageProps) {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [mounted]);
 
   if (!post) {
     return (
