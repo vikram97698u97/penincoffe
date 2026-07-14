@@ -19,7 +19,7 @@ export default function Footer() {
     db.getSettings().then(setSettings);
   }, [mounted]);
 
-  if (!settings) return null;
+  if (!mounted || !settings) return null;
 
   return (
     <footer className="bg-cream-dark border-t border-coffee-light/20 text-coffee-dark mt-auto">
@@ -137,7 +137,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-coffee-light/10 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-coffee-light">
-          <p>© {new Date().getFullYear()} {settings.siteName}. All rights reserved.</p>
+          <p>© {mounted ? new Date().getFullYear() : 2024} {settings.siteName}. All rights reserved.</p>
           <p className="flex items-center gap-1 mt-2 sm:mt-0">
             Brewed with <Heart className="h-3 w-3 text-terracotta fill-terracotta animate-pulse" /> and honesty for readers & writers.
           </p>

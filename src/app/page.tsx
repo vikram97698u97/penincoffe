@@ -69,7 +69,7 @@ export default function Home() {
     loadData();
   }, [mounted]);
 
-  if (loading || !settings) return (
+  if (!mounted || loading || !settings) return (
     <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex items-center justify-center min-h-[60vh]">
       <p className="font-serif italic text-coffee-light">Brewing content...</p>
     </main>
