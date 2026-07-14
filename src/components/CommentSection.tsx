@@ -81,6 +81,17 @@ export default function CommentSection({ postId }: { postId: string }) {
     );
   };
 
+  if (!mounted) {
+    return (
+      <div className="space-y-6 py-8">
+        <div className="animate-pulse space-y-3">
+          <div className="h-4 bg-coffee-light/10 rounded w-1/4"></div>
+          <div className="h-16 bg-coffee-light/10 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 bg-cream-dark/50 border border-coffee-light/10 p-6 md:p-8 rounded-lg">
       <div className="flex items-center gap-2 border-b border-coffee-light/10 pb-4">

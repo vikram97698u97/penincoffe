@@ -65,6 +65,23 @@ export default function RatingStars({ postId, readOnly = false }: RatingStarsPro
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="flex flex-col items-center sm:items-start gap-1">
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="p-0.5 text-coffee-light/20">
+                <Star className="h-4 w-4" />
+              </div>
+            ))}
+          </div>
+          <span className="text-xs font-bold text-coffee-dark">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center sm:items-start gap-1">
       <div className="flex items-center gap-1.5">

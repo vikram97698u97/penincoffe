@@ -12,6 +12,11 @@ import { fdb as db } from '@/lib/firebaseDB';
 export function PostCard({ post }: { post: Post }) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(post.favorites);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -21,6 +26,27 @@ export function PostCard({ post }: { post: Post }) {
       setIsFavorited(true);
     }
   };
+
+  if (!mounted) {
+    return (
+      <article className="group bg-cream-dark border border-coffee-light/10 rounded-lg overflow-hidden vintage-border transition-all flex flex-col h-full">
+        {post.coverImage && (
+          <Link href={`/${post.type === 'book-note' ? 'book-notes' : post.type === 'weekly-brew' ? 'weekly-brew' : 'stories'}/${post.slug}`} className="block relative h-48 w-full overflow-hidden border-b border-coffee-light/10">
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="object-cover w-full h-full"
+            />
+          </Link>
+        )}
+        <div className="p-5 flex flex-col flex-grow space-y-3">
+          <div className="animate-pulse h-6 bg-coffee-light/10 rounded w-3/4"></div>
+          <div className="animate-pulse h-4 bg-coffee-light/10 rounded w-full"></div>
+          <div className="animate-pulse h-4 bg-coffee-light/10 rounded w-2/3"></div>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article className="group bg-cream-dark border border-coffee-light/10 rounded-lg overflow-hidden vintage-border transition-all flex flex-col h-full">
@@ -171,6 +197,18 @@ export function ArticleCard({ article }: { article: Post }) {
     }
   };
 
+  if (!mounted) {
+    return (
+      <article className="bg-cream-dark border border-coffee-light/10 rounded-lg overflow-hidden vintage-border transition-all flex flex-col h-full">
+        <div className="p-6 flex flex-col flex-grow space-y-4">
+          <div className="animate-pulse h-6 bg-coffee-light/10 rounded w-3/4"></div>
+          <div className="animate-pulse h-4 bg-coffee-light/10 rounded w-full"></div>
+          <div className="animate-pulse h-4 bg-coffee-light/10 rounded w-2/3"></div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className="bg-cream-dark border border-coffee-light/15 rounded-xl overflow-hidden vintage-border flex flex-col justify-between group shadow-sm hover:shadow transition-shadow">
       {article.coverImage ? (
@@ -295,6 +333,17 @@ export function LetterCard({ letter }: { letter: Letter }) {
     setMounted(true);
   }, []);
 
+  if (!mounted) {
+    return (
+      <div className="memo-pad p-6 rounded-md border border-coffee-light/20 relative rotate-[-0.5deg]">
+        <div className="mt-2 space-y-4">
+          <div className="animate-pulse h-4 bg-coffee-light/10 rounded w-1/4"></div>
+          <div className="animate-pulse h-16 bg-coffee-light/10 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="memo-pad p-6 rounded-md border border-coffee-light/20 relative rotate-[-0.5deg] hover:rotate-0 transition-transform">
       {/* Tape decor */}
@@ -345,6 +394,17 @@ export function QuoteCard({ item }: { item: CoffeeTableItem }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div className="bg-cream-dark border border-coffee-light/10 p-6 rounded-lg vintage-border shadow-sm flex flex-col justify-between break-inside-avoid mb-4">
+        <div className="space-y-4">
+          <div className="animate-pulse h-3 bg-coffee-light/10 rounded w-1/4"></div>
+          <div className="animate-pulse h-16 bg-coffee-light/10 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cream-dark border border-coffee-light/10 p-6 rounded-lg vintage-border shadow-sm flex flex-col justify-between break-inside-avoid mb-4 group hover:scale-[1.01] transition-transform">

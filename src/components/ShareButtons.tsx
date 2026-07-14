@@ -41,6 +41,20 @@ export default function ShareButtons({ title, slug, type }: ShareButtonsProps) {
     return `https://www.facebook.com/sharer/sharer.php?u=${url}`;
   };
 
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs uppercase font-bold tracking-widest text-coffee-light mr-1 flex items-center gap-1">
+          <Share className="h-3.5 w-3.5" />
+          <span>Share:</span>
+        </span>
+        <div className="animate-pulse h-8 w-8 bg-coffee-light/10 rounded-full"></div>
+        <div className="animate-pulse h-8 w-8 bg-coffee-light/10 rounded-full"></div>
+        <div className="animate-pulse h-8 w-8 bg-coffee-light/10 rounded-full"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs uppercase font-bold tracking-widest text-coffee-light mr-1 flex items-center gap-1">
