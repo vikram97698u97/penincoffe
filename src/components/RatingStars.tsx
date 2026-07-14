@@ -14,8 +14,15 @@ export default function RatingStars({ postId, readOnly = false }: RatingStarsPro
   const [totalRatingsCount, setTotalRatingsCount] = useState(0);
   const [average, setAverage] = useState(0);
   const [hasRated, setHasRated] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Wait, let's look up ratings in the localStorage for this post
     const storedRatingsKey = `ratings_${postId}`;
     if (typeof window !== 'undefined') {
@@ -37,7 +44,7 @@ export default function RatingStars({ postId, readOnly = false }: RatingStarsPro
         setAverage(4.6);
       }
     }
-  }, [postId]);
+  }, [postId, mounted]);
 
   const handleRate = (value: number) => {
     if (readOnly || hasRated) return;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link2, Check, Share } from 'lucide-react';
 
 interface ShareButtonsProps {
@@ -11,9 +11,14 @@ interface ShareButtonsProps {
 
 export default function ShareButtons({ title, slug, type }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const getShareUrl = () => {
-    if (typeof window === 'undefined') return '';
+    if (!mounted || typeof window === 'undefined') return '';
     return `${window.location.origin}/${type}/${slug}`;
   };
 

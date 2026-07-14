@@ -9,10 +9,16 @@ export default function CommentsDashboard() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [filter, setFilter] = useState<'pending' | 'approved' | 'all'>('pending');
   const [refreshToggle, setRefreshToggle] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const [postsCache, setPostsCache] = useState<any[]>([]);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function load() {
       const all = await db.getComments(undefined, true);
       const posts = await db.getPosts(true);
@@ -28,7 +34,7 @@ export default function CommentsDashboard() {
       setComments(result);
     }
     load();
-  }, [filter, refreshToggle]);
+  }, [filter, refreshToggle, mounted]);
 
   const handleApprove = async (id: string) => {
     await db.approveComment(id);

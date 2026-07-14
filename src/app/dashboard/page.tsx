@@ -22,8 +22,14 @@ export default function DashboardOverview() {
   const [pendingComments, setPendingComments] = useState<Comment[]>([]);
   const [pendingLetters, setPendingLetters] = useState<Letter[]>([]);
   const [refreshToggle, setRefreshToggle] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       // Fetch metrics
       setStats(await db.getAnalytics());
@@ -37,7 +43,7 @@ export default function DashboardOverview() {
       setPendingLetters(letters.filter(l => !l.approved).slice(0, 3));
     }
     loadData();
-  }, [refreshToggle]);
+  }, [refreshToggle, mounted]);
 
   const approveComment = async (id: string) => {
     await db.approveComment(id);

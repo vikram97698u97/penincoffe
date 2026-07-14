@@ -10,13 +10,19 @@ export default function NewsletterDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function load() {
       setSubscribers(await db.getNewsletterSubscribers());
     }
     load();
-  }, [refreshToggle]);
+  }, [refreshToggle, mounted]);
 
   useEffect(() => {
     if (searchQuery.trim()) {

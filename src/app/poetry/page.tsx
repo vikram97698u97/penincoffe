@@ -21,14 +21,20 @@ export default function PoetryIndex() {
   const [filteredPoems, setFilteredPoems] = useState<Post[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const allPosts = await db.getPosts(false);
       setPoems(allPosts.filter(p => p.type === 'poem'));
     }
     loadData();
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     let result = [...poems];

@@ -11,8 +11,14 @@ export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [selectedType, setSelectedType] = useState<'all' | 'story' | 'poem' | 'book-note' | 'weekly-brew'>('all');
   const [results, setResults] = useState<Post[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const allPosts = await db.getPosts(false);
       
@@ -37,7 +43,7 @@ export default function SearchPage() {
       setResults(filtered);
     }
     loadData();
-  }, [query, selectedType]);
+  }, [query, selectedType, mounted]);
 
   return (
     <>

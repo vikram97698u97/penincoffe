@@ -48,6 +48,11 @@ export default function ArticleManager() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(false);
 
@@ -90,6 +95,8 @@ export default function ArticleManager() {
 
   // Load posts
   useEffect(() => {
+    if (!mounted) return;
+    
     async function load() {
       const all = await db.getPosts(true);
       // Get all article and legacy poem posts
@@ -101,10 +108,11 @@ export default function ArticleManager() {
     if (searchParams.get('new') === 'true') {
       handleCreateNewClick();
     }
-  }, [refreshToggle, searchParams]);
+  }, [refreshToggle, searchParams, mounted]);
 
   // Auto-save draft inside localStorage while editing or creating
   useEffect(() => {
+    if (!mounted) return;
     if (!isCreatingNew && !editingPost) return;
     if (!title && !content) return;
 
@@ -125,16 +133,18 @@ export default function ArticleManager() {
         focusKeyword
       };
       try {
-        localStorage.setItem('penincoffe_article_autosave', JSON.stringify(draftObj));
-        setAutoSaveStatus('Draft auto-saved ✨');
-        setTimeout(() => setAutoSaveStatus(''), 3000);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('penincoffe_article_autosave', JSON.stringify(draftObj));
+          setAutoSaveStatus('Draft auto-saved ✨');
+          setTimeout(() => setAutoSaveStatus(''), 3000);
+        }
       } catch (e) {
         // ignore storage errors
       }
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [title, slug, excerpt, content, coverImage, category, tagsInput, featured, authorName, status, seoTitle, metaDescription, focusKeyword, isCreatingNew, editingPost]);
+  }, [title, slug, excerpt, content, coverImage, category, tagsInput, featured, authorName, status, seoTitle, metaDescription, focusKeyword, isCreatingNew, editingPost, mounted]);
 
   const handleTitleChange = (val: string) => {
     setTitle(val);
@@ -171,24 +181,26 @@ export default function ArticleManager() {
 
     // Check if auto-saved draft exists
     try {
-      const saved = localStorage.getItem('penincoffe_article_autosave');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.title || parsed.content) {
-          if (confirm('An auto-saved article draft was found. Do you want to restore it?')) {
-            setTitle(parsed.title || '');
-            setSlug(parsed.slug || '');
-            setExcerpt(parsed.excerpt || '');
-            setContent(parsed.content || '');
-            setCoverImage(parsed.coverImage || '');
-            setCategory(parsed.category || 'Technology');
-            setTagsInput(parsed.tagsInput || '');
-            setFeatured(parsed.featured || false);
-            setAuthorName(parsed.authorName || 'Aria Vance');
-            setStatus(parsed.status || 'Draft');
-            setSeoTitle(parsed.seoTitle || '');
-            setMetaDescription(parsed.metaDescription || '');
-            setFocusKeyword(parsed.focusKeyword || '');
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('penincoffe_article_autosave');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.title || parsed.content) {
+            if (confirm('An auto-saved article draft was found. Do you want to restore it?')) {
+              setTitle(parsed.title || '');
+              setSlug(parsed.slug || '');
+              setExcerpt(parsed.excerpt || '');
+              setContent(parsed.content || '');
+              setCoverImage(parsed.coverImage || '');
+              setCategory(parsed.category || 'Technology');
+              setTagsInput(parsed.tagsInput || '');
+              setFeatured(parsed.featured || false);
+              setAuthorName(parsed.authorName || 'Aria Vance');
+              setStatus(parsed.status || 'Draft');
+              setSeoTitle(parsed.seoTitle || '');
+              setMetaDescription(parsed.metaDescription || '');
+              setFocusKeyword(parsed.focusKeyword || '');
+            }
           }
         }
       }
@@ -289,7 +301,9 @@ export default function ArticleManager() {
 
     // Clear auto-saved draft
     try {
-      localStorage.removeItem('penincoffe_article_autosave');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('penincoffe_article_autosave');
+      }
     } catch (e) {}
 
     setEditingPost(null);

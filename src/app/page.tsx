@@ -19,8 +19,15 @@ export default function Home() {
   const [coffeeTableItems, setCoffeeTableItems] = useState<any[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     async function loadData() {
       const fetchedSettings = await db.getSettings();
       setSettings(fetchedSettings);
@@ -60,7 +67,7 @@ export default function Home() {
       setLoading(false);
     }
     loadData();
-  }, []);
+  }, [mounted]);
 
   if (loading || !settings) return (
     <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex items-center justify-center min-h-[60vh]">

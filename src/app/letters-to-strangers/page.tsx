@@ -18,6 +18,7 @@ const CATEGORY_OPTIONS = [
 export default function LettersToStrangers() {
   const [letters, setLetters] = useState<Letter[]>([]);
   const [filteredLetters, setFilteredLetters] = useState<Letter[]>([]);
+  const [mounted, setMounted] = useState(false);
   
   // Tab states: 'all' | 'replied'
   const [activeTab, setActiveTab] = useState<'all' | 'replied'>('all');
@@ -36,8 +37,13 @@ export default function LettersToStrangers() {
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     loadLetters();
-  }, [submitted]);
+  }, [submitted, mounted]);
 
   useEffect(() => {
     let result = [...letters];

@@ -10,14 +10,20 @@ import { Post } from '@/types/database';
 
 export default function WeeklyBrewIndex() {
   const [brews, setBrews] = useState<Post[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const allBrews = await db.getPosts(false);
       setBrews(allBrews.filter(p => p.type === 'weekly-brew'));
     }
     loadData();
-  }, []);
+  }, [mounted]);
 
   return (
     <>

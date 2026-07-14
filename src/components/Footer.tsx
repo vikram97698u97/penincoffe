@@ -8,10 +8,16 @@ import { Settings } from '@/types/database';
 
 export default function Footer() {
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    db.getSettings().then(setSettings);
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    db.getSettings().then(setSettings);
+  }, [mounted]);
 
   if (!settings) return null;
 

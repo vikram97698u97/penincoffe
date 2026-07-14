@@ -25,15 +25,21 @@ export default function ArticlesIndexPage() {
   const [filteredArticles, setFilteredArticles] = useState<Post[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const allPosts = await db.getPosts(false);
       const articleList = allPosts.filter(p => p.type === 'article' || p.type === 'poem');
       setArticles(articleList);
     }
     loadData();
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     let result = [...articles];

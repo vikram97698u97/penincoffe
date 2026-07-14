@@ -34,6 +34,7 @@ function StoriesContent() {
 
   const [stories, setStories] = useState<Post[]>([]);
   const [filteredStories, setFilteredStories] = useState<Post[]>([]);
+  const [mounted, setMounted] = useState(false);
   
   // Search and Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,14 +45,19 @@ function StoriesContent() {
   const [minRead, setMinRead] = useState<number | null>(null);
   const [maxRead, setMaxRead] = useState<number | null>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Initialize and load stories
   useEffect(() => {
+    if (!mounted) return;
     async function loadData() {
       const allPosts = await db.getPosts(false);
       setStories(allPosts.filter(p => p.type === 'story'));
     }
     loadData();
-  }, []);
+  }, [mounted]);
 
   // Sync state from query parameters (specifically for the Coffee Menu selections)
   useEffect(() => {

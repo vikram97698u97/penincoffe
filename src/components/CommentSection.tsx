@@ -21,8 +21,15 @@ export default function CommentSection({ postId }: { postId: string }) {
   const [content, setContent] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [likedComments, setLikedComments] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Load approved comments
     async function load() {
       setComments(await db.getComments(postId, false));
@@ -34,7 +41,7 @@ export default function CommentSection({ postId }: { postId: string }) {
       const stored = localStorage.getItem(`liked_comments_${postId}`);
       if (stored) setLikedComments(JSON.parse(stored));
     }
-  }, [postId, submitted]);
+  }, [postId, submitted, mounted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
