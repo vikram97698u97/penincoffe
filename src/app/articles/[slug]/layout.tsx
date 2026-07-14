@@ -13,6 +13,9 @@ export async function generateStaticParams() {
   const allPosts = [...localPosts, ...firebasePosts].filter((p) => p && (p.type === 'article' || p.type === 'poem'));
 
   const uniqueSlugs = Array.from(new Set(allPosts.map((p) => p.slug))).filter(Boolean);
+  if (uniqueSlugs.length === 0) {
+    return [{ slug: '_placeholder_' }];
+  }
   return uniqueSlugs.map((slug) => ({
     slug,
   }));

@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import NewsletterForm from '@/components/NewsletterForm';
 import { PostCard, PoemCard, ArticleCard, LetterCard, BookCard } from '@/components/ContentCards';
 import { fdb } from '@/lib/firebaseDB';
-import { db as localDb } from '@/lib/db';
+import { db as localDb, isTemplatePost } from '@/lib/db';
 import { Post, Settings } from '@/types/database';
 
 export default function Home() {
@@ -43,7 +43,7 @@ export default function Home() {
       const allPostsMap = new Map<string, Post>();
       localPosts.forEach(p => p && allPostsMap.set(p.id, p));
       firebasePosts.forEach(p => p && allPostsMap.set(p.id, p));
-      const posts = Array.from(allPostsMap.values()).filter(p => p && p.published);
+      const posts = Array.from(allPostsMap.values()).filter(p => !isTemplatePost(p) && p.published);
       posts.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       
       // Featured Story

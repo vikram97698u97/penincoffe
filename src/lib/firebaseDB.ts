@@ -1,6 +1,6 @@
 import { ref, get, set as firebaseSet, push, update as firebaseUpdate, remove, query, orderByChild } from 'firebase/database';
 import { database } from './firebase';
-import { db } from './db';
+import { db, TEMPLATE_POST_IDS, TEMPLATE_COMMENT_IDS, TEMPLATE_LETTER_IDS, TEMPLATE_COFFEE_TABLE_IDS, isTemplatePost } from './db';
 import { Post, Comment, Letter, CoffeeTableItem, Settings } from '@/types/database';
 
 // Helper to recursively remove undefined properties from an object for Firebase compatibility
@@ -103,7 +103,7 @@ export const fdb = {
     try {
       const snapshot = await get(ref(database, 'posts'));
       if (snapshot.exists() && snapshot.val()) {
-        let posts = toArray<Post>(snapshot.val());
+        let posts = toArray<Post>(snapshot.val()).filter(p => !isTemplatePost(p));
         if (!includeUnpublished) {
           posts = posts.filter(p => p.published);
         }
@@ -182,7 +182,7 @@ export const fdb = {
     try {
       const snapshot = await get(ref(database, 'comments'));
       if (snapshot.exists() && snapshot.val()) {
-        let comments = toArray<Comment>(snapshot.val());
+        let comments = toArray<Comment>(snapshot.val()).filter(c => c && !TEMPLATE_COMMENT_IDS.has(c.id));
         if (postId) comments = comments.filter(c => c.postId === postId);
         if (!includeUnapproved) comments = comments.filter(c => c.approved);
         return comments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -245,7 +245,7 @@ export const fdb = {
     try {
       const snapshot = await get(ref(database, 'letters'));
       if (snapshot.exists() && snapshot.val()) {
-        let letters = toArray<Letter>(snapshot.val());
+        let letters = toArray<Letter>(snapshot.val()).filter(l => l && !TEMPLATE_LETTER_IDS.has(l.id));
         if (!includeUnapproved) letters = letters.filter(l => l.approved);
         return letters.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
@@ -303,7 +303,7 @@ export const fdb = {
     try {
       const snapshot = await get(ref(database, 'coffeeTable'));
       if (snapshot.exists() && snapshot.val()) {
-        return toArray<CoffeeTableItem>(snapshot.val()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return toArray<CoffeeTableItem>(snapshot.val()).filter(i => i && !TEMPLATE_COFFEE_TABLE_IDS.has(i.id)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
     } catch (err) {
       console.warn('Firebase getCoffeeTable failed/offline, using fallback:', err);
