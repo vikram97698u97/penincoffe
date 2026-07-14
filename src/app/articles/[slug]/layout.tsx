@@ -1,11 +1,11 @@
 import React from 'react';
 import { db } from '@/lib/db';
-import { fdb } from '@/lib/firebaseDB';
+import { getFirebasePostsForSSG } from '@/lib/firebaseSSG';
 
 export async function generateStaticParams() {
   let firebasePosts: any[] = [];
   try {
-    firebasePosts = await fdb.getPosts(true);
+    firebasePosts = await getFirebasePostsForSSG();
   } catch (err) {
     console.warn('Failed to fetch firebase posts for generateStaticParams:', err);
   }
