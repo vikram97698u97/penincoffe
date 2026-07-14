@@ -884,11 +884,11 @@ export default function ArticleManager() {
 
                       {/* Date */}
                       <td className="p-4 text-coffee-light font-mono text-[11px]">
-                        {new Date(post.scheduledDate || post.createdAt).toLocaleDateString(undefined, {
+                        {mounted ? new Date(post.scheduledDate || post.createdAt).toLocaleDateString(undefined, {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric'
-                        })}
+                        }) : ''}
                       </td>
 
                       {/* Reading Time */}

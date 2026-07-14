@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Share2, MessageSquare, Coffee, Bookmark, Pin } from 'lucide-react';
 import { Post, Letter, CoffeeTableItem, BookShelfItem } from '@/types/database';
 import { fdb as db } from '@/lib/firebaseDB';
@@ -156,6 +156,11 @@ export function PoemCard({ poem }: { poem: Post }) {
 export function ArticleCard({ article }: { article: Post }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(article.favorites || 0);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -214,11 +219,11 @@ export function ArticleCard({ article }: { article: Post }) {
             <span className="font-semibold text-coffee-dark">{article.authorName || 'Aria Vance'}</span>
             <span>•</span>
             <span className="font-mono text-[11px]">
-              {new Date(article.scheduledDate || article.createdAt).toLocaleDateString(undefined, {
+              {mounted ? new Date(article.scheduledDate || article.createdAt).toLocaleDateString(undefined, {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
-              })}
+              }) : ''}
             </span>
           </div>
 
@@ -284,6 +289,12 @@ export function BookCard({ book }: { book: BookShelfItem }) {
 // LETTER CARD (FOR LETTERS TO STRANGERS)
 // ----------------------------------------------------
 export function LetterCard({ letter }: { letter: Letter }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="memo-pad p-6 rounded-md border border-coffee-light/20 relative rotate-[-0.5deg] hover:rotate-0 transition-transform">
       {/* Tape decor */}
@@ -295,7 +306,7 @@ export function LetterCard({ letter }: { letter: Letter }) {
         {/* Category info */}
         <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-coffee-light font-bold border-b border-coffee-light/10 pb-1.5">
           <span>{letter.category}</span>
-          <span>{new Date(letter.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <span>{mounted ? new Date(letter.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</span>
         </div>
 
         {/* Message */}
@@ -329,12 +340,18 @@ export function LetterCard({ letter }: { letter: Letter }) {
 // QUOTE CARD (FOR COFFEE TABLE MASONRY)
 // ----------------------------------------------------
 export function QuoteCard({ item }: { item: CoffeeTableItem }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="bg-cream-dark border border-coffee-light/10 p-6 rounded-lg vintage-border shadow-sm flex flex-col justify-between break-inside-avoid mb-4 group hover:scale-[1.01] transition-transform">
       <div className="space-y-4">
         <div className="flex items-center justify-between text-[9px] uppercase tracking-widest text-coffee-light font-bold border-b border-coffee-light/5 pb-2">
           <span>{item.type}</span>
-          <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+          <span>{mounted ? new Date(item.createdAt).toLocaleDateString() : ''}</span>
         </div>
 
         {item.type === 'photo' && item.mediaUrl && (

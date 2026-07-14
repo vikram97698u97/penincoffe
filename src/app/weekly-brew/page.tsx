@@ -74,12 +74,12 @@ export default function WeeklyBrewIndex() {
                       <div className="flex items-center gap-1.5 text-xs text-coffee-light">
                         <Calendar className="h-3.5 w-3.5" />
                         <span>
-                          {new Date(brew.createdAt).toLocaleDateString(undefined, {
+                          {mounted ? new Date(brew.createdAt).toLocaleDateString(undefined, {
                             weekday: 'long',
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric'
-                          })}
+                          }) : ''}
                         </span>
                       </div>
 

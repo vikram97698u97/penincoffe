@@ -9,6 +9,7 @@ export default function CoffeeTableDashboard() {
   const [items, setItems] = useState<CoffeeTableItem[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [refreshToggle, setRefreshToggle] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   // Form states
   const [type, setType] = useState<'quote' | 'prompt' | 'song' | 'photo' | 'observation'>('quote');
@@ -17,11 +18,16 @@ export default function CoffeeTableDashboard() {
   const [tagsInput, setTagsInput] = useState('');
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function load() {
       setItems(await db.getCoffeeTable());
     }
     load();
-  }, [refreshToggle]);
+  }, [refreshToggle, mounted]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this item from the inspiration board?')) {
@@ -183,7 +189,7 @@ export default function CoffeeTableDashboard() {
                     </td>
                     <td className="px-6 py-4 max-w-xs truncate font-serif italic text-coffee-dark">"{item.content}"</td>
                     <td className="px-6 py-4 text-coffee-light">{item.tags.join(', ') || 'none'}</td>
-                    <td className="px-6 py-4 text-coffee-light">{new Date(item.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-coffee-light">{mounted ? new Date(item.createdAt).toLocaleDateString() : ''}</td>
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => handleDelete(item.id)}

@@ -80,7 +80,7 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
           {/* Top Stamp decor */}
           <div className="absolute top-4 right-4 sm:right-8 bg-amber-100/40 border border-dashed border-coffee-light/35 p-3 rounded rotate-[4deg] text-center select-none shadow-sm">
             <span className="text-[8px] uppercase tracking-widest text-coffee-light block font-bold">Sunday Mail</span>
-            <span className="font-serif text-xs font-bold text-coffee-dark">{new Date(brew.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' })}</span>
+            <span className="font-serif text-xs font-bold text-coffee-dark">{mounted ? new Date(brew.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' }) : ''}</span>
           </div>
 
           {/* Header */}
@@ -94,7 +94,7 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
             <div className="flex items-center gap-4 text-xs text-coffee-light">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {new Date(brew.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                {mounted ? new Date(brew.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : ''}
               </span>
               <span className="flex items-center gap-1">
                 <Coffee className="h-3.5 w-3.5" />

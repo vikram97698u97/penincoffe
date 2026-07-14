@@ -133,7 +133,7 @@ export default function CommentsDashboard() {
                         {getPostTitle(comment.postId)}
                       </a>
                     </td>
-                    <td className="px-6 py-4 text-coffee-light">{new Date(comment.createdAt).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 text-coffee-light">{mounted ? new Date(comment.createdAt).toLocaleDateString() : ''}</td>
                     <td className="px-6 py-4 text-right space-x-2">
                       {!comment.approved && (
                         <button

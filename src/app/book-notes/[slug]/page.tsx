@@ -99,7 +99,7 @@ export default function BookNoteDetail({ params }: PageProps) {
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-coffee-light pt-2 border-y border-coffee-light/10 py-3">
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
-              {new Date(note.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+              {mounted ? new Date(note.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }) : ''}
             </span>
             <span className="flex items-center gap-1">
               <Coffee className="h-3.5 w-3.5" />

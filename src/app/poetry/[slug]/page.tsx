@@ -90,7 +90,7 @@ export default function PoemDetail({ params }: PageProps) {
             <div className="flex items-center justify-center gap-4 text-[10px] text-coffee-light pt-2">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
-                {new Date(poem.createdAt).toLocaleDateString()}
+                {mounted ? new Date(poem.createdAt).toLocaleDateString() : ''}
               </span>
               <span className="flex items-center gap-1">
                 <Eye className="h-3 w-3" />

@@ -179,7 +179,7 @@ export default function CommentSection({ postId }: { postId: string }) {
                     </span>
                   </div>
                   <span className="text-[10px] text-coffee-light">
-                    {new Date(comment.createdAt).toLocaleDateString()}
+                    {mounted ? new Date(comment.createdAt).toLocaleDateString() : ''}
                   </span>
                 </div>
                 

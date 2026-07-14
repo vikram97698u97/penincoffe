@@ -327,7 +327,7 @@ export default function Home() {
                     Read Weekly Brew →
                   </Link>
                   <span className="text-[10px] text-coffee-light">
-                    {new Date(latestBrew.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}
+                    {mounted ? new Date(latestBrew.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) : ''}
                   </span>
                 </div>
               </div>

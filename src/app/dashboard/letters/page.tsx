@@ -11,8 +11,14 @@ export default function LettersDashboard() {
   const [refreshToggle, setRefreshToggle] = useState(false);
   const [replyingId, setReplyingId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     async function load() {
       const all = await db.getLetters(true);
       
@@ -26,7 +32,7 @@ export default function LettersDashboard() {
       setLetters(result);
     }
     load();
-  }, [filter, refreshToggle]);
+  }, [filter, refreshToggle, mounted]);
 
   const handleApprove = async (id: string) => {
     await db.approveLetter(id);
@@ -108,7 +114,7 @@ export default function LettersDashboard() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-[10px] uppercase font-bold text-coffee-light border-b border-coffee-light/5 pb-2">
                   <span>FROM: {letter.nickname} ({letter.category})</span>
-                  <span>{new Date(letter.createdAt).toLocaleDateString()}</span>
+                  <span>{mounted ? new Date(letter.createdAt).toLocaleDateString() : ''}</span>
                 </div>
                 
                 <p className="font-serif text-xs italic text-coffee-dark/90 leading-relaxed whitespace-pre-wrap">

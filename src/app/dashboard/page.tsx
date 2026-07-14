@@ -143,7 +143,7 @@ export default function DashboardOverview() {
                 <div key={l.id} className="bg-cream-light p-4 rounded border border-coffee-light/10 space-y-3">
                   <div className="flex justify-between items-center text-[10px] font-bold text-coffee-light border-b border-coffee-light/5 pb-1">
                     <span>FROM: {l.nickname} ({l.category})</span>
-                    <span>{new Date(l.createdAt).toLocaleDateString()}</span>
+                    <span>{mounted ? new Date(l.createdAt).toLocaleDateString() : ''}</span>
                   </div>
                   <p className="font-serif text-xs italic text-coffee-dark line-clamp-2">"{l.message}"</p>
                   <div className="flex justify-end gap-2 pt-1">
@@ -188,7 +188,7 @@ export default function DashboardOverview() {
                 <div key={c.id} className="bg-cream-light p-4 rounded border border-coffee-light/10 space-y-3">
                   <div className="flex justify-between items-center text-[10px] font-bold text-coffee-light border-b border-coffee-light/5 pb-1">
                     <span>{c.nickname} (Felt: {c.feeling})</span>
-                    <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+                    <span>{mounted ? new Date(c.createdAt).toLocaleDateString() : ''}</span>
                   </div>
                   <p className="font-serif text-xs italic text-coffee-dark line-clamp-2">"{c.content}"</p>
                   <div className="flex justify-end gap-2 pt-1">
