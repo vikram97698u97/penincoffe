@@ -4,6 +4,16 @@ const nextConfig: NextConfig = {
   output: process.env.NODE_ENV === "development" ? undefined : "export",
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.firebasestorage.app',
+      },
+    ],
   },
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

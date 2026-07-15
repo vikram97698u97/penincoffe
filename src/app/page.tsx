@@ -30,15 +30,19 @@ export default function Home() {
     if (!mounted) return;
     
     async function loadData() {
-      const fetchedSettings = await fdb.getSettings();
+      // Parallel data fetching for better performance
+      const [fetchedSettings, firebasePosts, approvedLetters, tableItems] = await Promise.all([
+        fdb.getSettings(),
+        fdb.getPosts(false).catch(err => {
+          console.warn('Failed to load firebase posts on client:', err);
+          return [];
+        }),
+        fdb.getLetters(false),
+        fdb.getCoffeeTable()
+      ]);
+
       setSettings(fetchedSettings);
 
-      let firebasePosts: Post[] = [];
-      try {
-        firebasePosts = await fdb.getPosts(false);
-      } catch (err) {
-        console.warn('Failed to load firebase posts on client:', err);
-      }
       const localPosts = localDb.getPosts(false);
       const allPostsMap = new Map<string, Post>();
       localPosts.forEach(p => p && allPostsMap.set(p.id, p));
@@ -69,14 +73,10 @@ export default function Home() {
       const brews = posts.filter(p => p.type === 'weekly-brew').slice(0, 1);
       setLatestBrew(brews[0] || null);
 
-      // Get an approved letter
-      const approvedLetters = await fdb.getLetters(false);
+      // Set letters and coffee table items
       if (approvedLetters.length > 0) {
         setRandomLetter(approvedLetters[0]);
       }
-
-      // Get coffee table items
-      const tableItems = await fdb.getCoffeeTable();
       setCoffeeTableItems(tableItems.slice(0, 2));
 
       setLoading(false);
@@ -86,7 +86,10 @@ export default function Home() {
 
   if (!mounted || loading || !settings) return (
     <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex items-center justify-center min-h-[60vh]">
-      <p className="font-serif italic text-coffee-light">Brewing content...</p>
+      <div className="text-center space-y-4">
+        <div className="animate-spin w-8 h-8 border-2 border-coffee-light/20 border-t-terracotta rounded-full mx-auto"></div>
+        <p className="font-serif italic text-coffee-light">Brewing content...</p>
+      </div>
     </main>
   );
 
