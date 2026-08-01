@@ -27,6 +27,7 @@ export default function StoryDetail({ params }: PageProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -35,24 +36,38 @@ export default function StoryDetail({ params }: PageProps) {
   useEffect(() => {
     if (!mounted) return;
     async function loadData() {
-      const foundPost = await db.getPostBySlug(slug);
-      if (foundPost) {
-        setPost(foundPost);
-        setFavCount(foundPost.favorites);
-        await db.incrementViews(foundPost.id, foundPost.views);
+      setIsLoading(true);
+      try {
+        const foundPost = await db.getPostBySlug(slug);
+        if (foundPost) {
+          setPost(foundPost);
+          setFavCount(foundPost.favorites);
+          await db.incrementViews(foundPost.id, foundPost.views);
 
-        // Fetch related posts (same type, matching category, excluding current post)
-        const all = await db.getPosts(false);
-        const related = all
-          .filter(p => p.type === 'story' && p.id !== foundPost.id && p.category === foundPost.category)
-          .slice(0, 2);
-        
-        // Fallback to general stories if none share the category
-        if (related.length === 0) {
-          setRelatedPosts(all.filter(p => p.type === 'story' && p.id !== foundPost.id).slice(0, 2));
-        } else {
-          setRelatedPosts(related);
+          if (typeof window !== 'undefined') {
+            const liked = localStorage.getItem(`liked_post_${foundPost.id}`);
+            if (liked === 'true') {
+              setIsFavorited(true);
+            }
+          }
+
+          // Fetch related posts (same type, matching category, excluding current post)
+          const all = await db.getPosts(false);
+          const related = all
+            .filter(p => p.type === 'story' && p.id !== foundPost.id && p.category === foundPost.category)
+            .slice(0, 2);
+          
+          // Fallback to general stories if none share the category
+          if (related.length === 0) {
+            setRelatedPosts(all.filter(p => p.type === 'story' && p.id !== foundPost.id).slice(0, 2));
+          } else {
+            setRelatedPosts(related);
+          }
         }
+      } catch (error) {
+        console.error('Error loading story:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadData();
@@ -73,7 +88,19 @@ export default function StoryDetail({ params }: PageProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [mounted]);
 
-  if (!mounted || !post) {
+  if (!mounted || isLoading) {
+    return (
+      <>
+        <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
+          <Coffee className="h-12 w-12 text-coffee-light/40 animate-pulse mb-4" />
+          <p className="text-sm text-coffee-light mt-1 animate-pulse font-serif">Pouring a new story...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!post) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
@@ -94,6 +121,9 @@ export default function StoryDetail({ params }: PageProps) {
       await db.incrementFavorites(post.id, post.favorites);
       setFavCount(prev => prev + 1);
       setIsFavorited(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked_post_${post.id}`, 'true');
+      }
     }
   };
 

@@ -16,7 +16,13 @@ export function PostCard({ post }: { post: Post }) {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (typeof window !== 'undefined') {
+      const liked = localStorage.getItem(`liked_post_${post.id}`);
+      if (liked === 'true') {
+        setIsFavorited(true);
+      }
+    }
+  }, [post.id]);
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -24,6 +30,9 @@ export function PostCard({ post }: { post: Post }) {
       await db.incrementFavorites(post.id, post.favorites);
       setFavCount(prev => prev + 1);
       setIsFavorited(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked_post_${post.id}`, 'true');
+      }
     }
   };
 
@@ -125,12 +134,24 @@ export function PoemCard({ poem }: { poem: Post }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(poem.favorites);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const liked = localStorage.getItem(`liked_post_${poem.id}`);
+      if (liked === 'true') {
+        setIsLiked(true);
+      }
+    }
+  }, [poem.id]);
+
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!isLiked) {
       await db.incrementFavorites(poem.id, poem.favorites);
       setLikeCount(prev => prev + 1);
       setIsLiked(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked_post_${poem.id}`, 'true');
+      }
     }
   };
 
@@ -186,7 +207,13 @@ export function ArticleCard({ article }: { article: Post }) {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (typeof window !== 'undefined') {
+      const liked = localStorage.getItem(`liked_post_${article.id}`);
+      if (liked === 'true') {
+        setIsLiked(true);
+      }
+    }
+  }, [article.id]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -194,6 +221,9 @@ export function ArticleCard({ article }: { article: Post }) {
       await db.incrementFavorites(article.id, article.favorites || 0);
       setLikeCount(prev => prev + 1);
       setIsLiked(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked_post_${article.id}`, 'true');
+      }
     }
   };
 

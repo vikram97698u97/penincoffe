@@ -23,6 +23,7 @@ export default function BookNoteDetail({ params }: PageProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favCount, setFavCount] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -31,24 +32,50 @@ export default function BookNoteDetail({ params }: PageProps) {
   useEffect(() => {
     if (!mounted) return;
     async function loadData() {
-      const found = await db.getPostBySlug(slug);
-      if (found && found.type === 'book-note') {
-        setNote(found);
-        setFavCount(found.favorites);
-        await db.incrementViews(found.id, found.views);
+      setIsLoading(true);
+      try {
+        const found = await db.getPostBySlug(slug);
+        if (found && found.type === 'book-note') {
+          setNote(found);
+          setFavCount(found.favorites);
+          await db.incrementViews(found.id, found.views);
 
-        // Fetch related book notes
-        const all = await db.getPosts(false);
-        const related = all
-          .filter(p => p.type === 'book-note' && p.id !== found.id)
-          .slice(0, 2);
-        setRelatedNotes(related);
+          if (typeof window !== 'undefined') {
+            const liked = localStorage.getItem(`liked_post_${found.id}`);
+            if (liked === 'true') {
+              setIsFavorited(true);
+            }
+          }
+
+          // Fetch related book notes
+          const all = await db.getPosts(false);
+          const related = all
+            .filter(p => p.type === 'book-note' && p.id !== found.id)
+            .slice(0, 2);
+          setRelatedNotes(related);
+        }
+      } catch (error) {
+        console.error('Error loading book note:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadData();
   }, [slug, mounted]);
 
-  if (!mounted || !note) {
+  if (!mounted || isLoading) {
+    return (
+      <>
+        <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
+          <BookOpen className="h-12 w-12 text-coffee-light/40 animate-pulse mb-4" />
+          <p className="text-sm text-coffee-light mt-1 animate-pulse font-serif">Reflecting on pages...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!note) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
@@ -69,6 +96,9 @@ export default function BookNoteDetail({ params }: PageProps) {
       await db.incrementFavorites(note.id, note.favorites);
       setFavCount(prev => prev + 1);
       setIsFavorited(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked_post_${note.id}`, 'true');
+      }
     }
   };
 

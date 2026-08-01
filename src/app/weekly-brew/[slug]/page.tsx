@@ -20,6 +20,7 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -28,17 +29,43 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
   useEffect(() => {
     if (!mounted) return;
     async function loadData() {
-      const found = await db.getPostBySlug(slug);
-      if (found && found.type === 'weekly-brew') {
-        setBrew(found);
-        setLikeCount(found.favorites);
-        await db.incrementViews(found.id, found.views);
+      setIsLoading(true);
+      try {
+        const found = await db.getPostBySlug(slug);
+        if (found && found.type === 'weekly-brew') {
+          setBrew(found);
+          setLikeCount(found.favorites);
+          await db.incrementViews(found.id, found.views);
+
+          if (typeof window !== 'undefined') {
+            const liked = localStorage.getItem(`liked_post_${found.id}`);
+            if (liked === 'true') {
+              setIsLiked(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading weekly brew letter:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadData();
   }, [slug, mounted]);
 
-  if (!mounted || !brew) {
+  if (!mounted || isLoading) {
+    return (
+      <>
+        <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
+          <Mail className="h-12 w-12 text-coffee-light/40 animate-pulse mb-4" />
+          <p className="text-sm text-coffee-light mt-1 animate-pulse font-serif">Brewing Sunday letter...</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!brew) {
     return (
       <>
         <div className="flex-grow flex flex-col items-center justify-center py-32 text-center max-w-md mx-auto px-4">
@@ -59,6 +86,9 @@ export default function WeeklyBrewDetail({ params }: PageProps) {
       await db.incrementFavorites(brew.id, brew.favorites);
       setLikeCount(prev => prev + 1);
       setIsLiked(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`liked_post_${brew.id}`, 'true');
+      }
     }
   };
 
