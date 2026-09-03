@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Heart, Share2, MessageSquare, Coffee, Bookmark, Pin } from 'lucide-react';
 import { Post, Letter, CoffeeTableItem, BookShelfItem } from '@/types/database';
 import { fdb as db } from '@/lib/firebaseDB';
+import { getPostUrl } from '@/lib/db';
 
 // ----------------------------------------------------
 // POST CARD (FOR STORIES & ARTICLES)
@@ -36,11 +37,13 @@ export function PostCard({ post }: { post: Post }) {
     }
   };
 
+  const postUrl = getPostUrl(post);
+
   if (!mounted) {
     return (
       <article className="group bg-cream-dark border border-coffee-light/10 rounded-lg overflow-hidden vintage-border transition-all flex flex-col h-full">
         {post.coverImage && (
-          <Link href={`/${post.type === 'book-note' ? 'book-notes' : post.type === 'weekly-brew' ? 'weekly-brew' : 'stories'}/${post.slug}`} className="block relative h-48 w-full overflow-hidden border-b border-coffee-light/10">
+          <Link href={postUrl} className="block relative h-48 w-full overflow-hidden border-b border-coffee-light/10">
             <img
               src={post.coverImage}
               alt={post.title}
@@ -60,7 +63,7 @@ export function PostCard({ post }: { post: Post }) {
   return (
     <article className="group bg-cream-dark border border-coffee-light/10 rounded-lg overflow-hidden vintage-border transition-all flex flex-col h-full">
       {post.coverImage && (
-        <Link href={`/${post.type === 'book-note' ? 'book-notes' : post.type === 'weekly-brew' ? 'weekly-brew' : 'stories'}/${post.slug}`} className="block relative h-48 w-full overflow-hidden border-b border-coffee-light/10">
+        <Link href={postUrl} className="block relative h-48 w-full overflow-hidden border-b border-coffee-light/10">
           <img
             src={post.coverImage}
             alt={post.title}
@@ -89,7 +92,7 @@ export function PostCard({ post }: { post: Post }) {
 
         {/* Title */}
         <h3 className="font-serif text-xl font-bold leading-tight group-hover:text-terracotta transition-colors line-clamp-2 break-words">
-          <Link href={`/${post.type === 'book-note' ? 'book-notes' : post.type === 'weekly-brew' ? 'weekly-brew' : 'stories'}/${post.slug}`}>
+          <Link href={postUrl}>
             {post.title}
           </Link>
         </h3>
@@ -102,7 +105,7 @@ export function PostCard({ post }: { post: Post }) {
         {/* Card Footer */}
         <div className="flex items-center justify-between pt-4 border-t border-coffee-light/5 mt-auto">
           <Link
-            href={`/${post.type === 'book-note' ? 'book-notes' : post.type === 'weekly-brew' ? 'weekly-brew' : 'stories'}/${post.slug}`}
+            href={postUrl}
             className="text-xs font-bold text-coffee-dark hover:text-terracotta transition-colors uppercase tracking-wider flex items-center gap-1"
           >
             <span>Read More</span>
@@ -155,8 +158,7 @@ export function PoemCard({ poem }: { poem: Post }) {
     }
   };
 
-  const isArticle = poem.type === 'article';
-  const targetRoute = isArticle ? `/articles/${poem.slug}` : `/poetry/${poem.slug}`;
+  const targetRoute = getPostUrl(poem);
 
   return (
     <article className="bg-cream-dark border border-coffee-light/10 p-8 rounded-lg vintage-border flex flex-col justify-between h-80 text-center relative group">
@@ -179,7 +181,7 @@ export function PoemCard({ poem }: { poem: Post }) {
           href={targetRoute}
           className="text-xs font-bold text-coffee-dark hover:text-terracotta uppercase tracking-wider transition-colors"
         >
-          {isArticle ? 'Read Article →' : 'Enter Poem →'}
+          {poem.type === 'article' ? 'Read Article →' : 'Enter Poem →'}
         </Link>
         <div className="flex items-center gap-1">
           <button
@@ -227,6 +229,8 @@ export function ArticleCard({ article }: { article: Post }) {
     }
   };
 
+  const articleUrl = getPostUrl(article);
+
   if (!mounted) {
     return (
       <article className="bg-cream-dark border border-coffee-light/10 rounded-lg overflow-hidden vintage-border transition-all flex flex-col h-full">
@@ -242,7 +246,7 @@ export function ArticleCard({ article }: { article: Post }) {
   return (
     <article className="bg-cream-dark border border-coffee-light/15 rounded-xl overflow-hidden vintage-border flex flex-col justify-between group shadow-sm hover:shadow transition-shadow">
       {article.coverImage ? (
-        <Link href={`/articles/${article.slug}`} className="block h-48 overflow-hidden relative">
+        <Link href={articleUrl} className="block h-48 overflow-hidden relative">
           <img
             src={article.coverImage}
             alt={article.title}
@@ -274,7 +278,7 @@ export function ArticleCard({ article }: { article: Post }) {
           </div>
 
           <h3 className="font-serif text-xl font-bold tracking-tight text-coffee-dark group-hover:text-terracotta transition-colors leading-snug line-clamp-2 break-words">
-            <Link href={`/articles/${article.slug}`}>{article.title}</Link>
+            <Link href={articleUrl}>{article.title}</Link>
           </h3>
 
           <p className="text-xs font-sans text-coffee-light line-clamp-3 leading-relaxed">

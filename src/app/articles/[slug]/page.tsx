@@ -32,7 +32,7 @@ export default function ArticleDetail({ params }: PageProps) {
       setIsLoading(true);
       try {
         const found = await db.getPostBySlug(slug);
-        if (found && (found.type === 'article' || found.type === 'poem')) {
+        if (found) {
           setArticle(found);
           setLikeCount(found.favorites || 0);
           await db.incrementViews(found.id, found.views || 0);

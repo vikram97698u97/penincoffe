@@ -32,10 +32,10 @@ export default function PoemDetail({ params }: PageProps) {
       setIsLoading(true);
       try {
         const found = await db.getPostBySlug(slug);
-        if (found && found.type === 'poem') {
+        if (found) {
           setPoem(found);
-          setLikeCount(found.favorites);
-          await db.incrementViews(found.id, found.views);
+          setLikeCount(found.favorites || 0);
+          await db.incrementViews(found.id, found.views || 0);
 
           if (typeof window !== 'undefined') {
             const liked = localStorage.getItem(`liked_post_${found.id}`);

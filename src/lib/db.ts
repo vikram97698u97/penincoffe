@@ -1,4 +1,4 @@
-import { Post, Comment, Letter, CoffeeTableItem, Settings, User } from '@/types/database';
+import { Post, PostType, Comment, Letter, CoffeeTableItem, Settings, User } from '@/types/database';
 
 // ----------------------------------------------------
 // INITIAL MOCK DATA DEFINITIONS
@@ -37,6 +37,31 @@ export function isTemplatePost(p: any): boolean {
   if (!p) return true;
   if (p.id && TEMPLATE_POST_IDS.has(p.id)) return true;
   return false;
+}
+
+export function isPostPublished(p: Post): boolean {
+  if (!p) return false;
+  if (p.published) return true;
+  if (p.status === 'Published') return true;
+  if (p.scheduledDate && new Date(p.scheduledDate).getTime() <= Date.now()) return true;
+  return false;
+}
+
+export function getPostUrl(post: { type: PostType | string; slug: string }): string {
+  if (!post || !post.slug) return '#';
+  switch (post.type) {
+    case 'article':
+      return `/articles/${post.slug}`;
+    case 'poem':
+      return `/poetry/${post.slug}`;
+    case 'book-note':
+      return `/book-notes/${post.slug}`;
+    case 'weekly-brew':
+      return `/weekly-brew/${post.slug}`;
+    case 'story':
+    default:
+      return `/stories/${post.slug}`;
+  }
 }
 
 const INITIAL_POSTS: Post[] = [];
@@ -82,7 +107,7 @@ export const db = {
     const posts = getStorageItem<Post[]>('pen_coffee_posts', INITIAL_POSTS);
     const filtered = posts.filter(p => !isTemplatePost(p));
     const sorted = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return includeUnpublished ? sorted : sorted.filter(p => p.published);
+    return includeUnpublished ? sorted : sorted.filter(isPostPublished);
   },
   getPostBySlug(slug: string): Post | undefined {
     return this.getPosts(true).find(p => p.slug === slug);

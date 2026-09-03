@@ -1,6 +1,6 @@
 import { ref, get, set as firebaseSet, push, update as firebaseUpdate, remove, query, orderByChild } from 'firebase/database';
 import { database } from './firebase';
-import { db, TEMPLATE_POST_IDS, TEMPLATE_COMMENT_IDS, TEMPLATE_LETTER_IDS, TEMPLATE_COFFEE_TABLE_IDS, isTemplatePost } from './db';
+import { db, TEMPLATE_POST_IDS, TEMPLATE_COMMENT_IDS, TEMPLATE_LETTER_IDS, TEMPLATE_COFFEE_TABLE_IDS, isTemplatePost, isPostPublished } from './db';
 import { Post, Comment, Letter, CoffeeTableItem, Settings } from '@/types/database';
 
 // Helper to recursively remove undefined properties from an object for Firebase compatibility
@@ -105,7 +105,7 @@ export const fdb = {
       if (snapshot.exists() && snapshot.val()) {
         let posts = toArray<Post>(snapshot.val()).filter(p => !isTemplatePost(p));
         if (!includeUnpublished) {
-          posts = posts.filter(p => p.published);
+          posts = posts.filter(isPostPublished);
         }
         return posts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
@@ -123,6 +123,8 @@ export const fdb = {
     return posts.find(p => p.id === id);
   },
   async savePost(post: Post): Promise<void> {
+    // Always update local database fallback first to ensure instant sync
+    db.savePost(post);
     try {
       const isNew = !post.id || post.id.startsWith('new-');
       let postRef;
@@ -130,14 +132,14 @@ export const fdb = {
         postRef = push(ref(database, 'posts'));
         post.id = postRef.key as string;
         post.createdAt = new Date().toISOString();
+        db.savePost(post); // Update local db with generated id
       } else {
         postRef = ref(database, `posts/${post.id}`);
       }
       post.updatedAt = new Date().toISOString();
       await set(postRef, post);
     } catch (err) {
-      console.warn('Firebase savePost failed/offline, falling back to local db:', err);
-      db.savePost(post);
+      console.warn('Firebase savePost failed/offline, fallback updated:', err);
     }
   },
   async deletePost(id: string): Promise<void> {

@@ -26,6 +26,7 @@ import {
   Tag
 } from 'lucide-react';
 import { fdb as db } from '@/lib/firebaseDB';
+import { getPostUrl } from '@/lib/db';
 import { Post, PostType } from '@/types/database';
 
 const ARTICLE_CATEGORIES = [
@@ -911,7 +912,7 @@ export default function ArticleManager() {
                           </button>
 
                           <button
-                            onClick={() => window.open(`/articles/${post.slug}`, '_blank')}
+                            onClick={() => window.open(getPostUrl(post), '_blank')}
                             title="Preview Article"
                             className="p-1.5 text-coffee-light hover:text-coffee-dark hover:bg-cream-light rounded transition-colors"
                           >

@@ -18,6 +18,7 @@ import {
   Coffee
 } from 'lucide-react';
 import { fdb as db } from '@/lib/firebaseDB';
+import { getPostUrl } from '@/lib/db';
 import { Post, PostType } from '@/types/database';
 
 interface PostManagerProps {
@@ -141,7 +142,9 @@ export default function PostManager({ filterType }: PostManagerProps) {
       tags: tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0),
       readingTime: Number(readingTime) || 3,
       featured,
-      published,
+      published: published || (!!scheduleDate && new Date(scheduleDate).getTime() <= Date.now()),
+      status: published ? 'Published' : scheduleDate ? 'Scheduled' : 'Draft',
+      scheduledDate: scheduleDate ? scheduleDate : undefined,
       views: editingPost?.views || 0,
       favorites: editingPost?.favorites || 0,
       authorId: editingPost?.authorId || 'author-aria',
@@ -439,6 +442,13 @@ export default function PostManager({ filterType }: PostManagerProps) {
                       </td>
                       <td className="px-6 py-4 text-coffee-light">{post.views}</td>
                       <td className="px-6 py-4 text-right space-x-2">
+                        <button
+                          onClick={() => window.open(getPostUrl(post), '_blank')}
+                          className="p-1.5 text-coffee-light hover:text-coffee-dark hover:bg-cream-light rounded transition-colors"
+                          title="Preview post"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => handleEdit(post)}
                           className="p-1.5 text-coffee-light hover:text-coffee-dark hover:bg-cream-light rounded transition-colors"

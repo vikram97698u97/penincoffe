@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Search, Compass, BookOpen, Coffee, MessageSquare, Heart } from 'lucide-react';
 import Footer from '@/components/Footer';
-import { PostCard, PoemCard } from '@/components/ContentCards';
+import { PostCard, PoemCard, ArticleCard } from '@/components/ContentCards';
 import { fdb as db } from '@/lib/firebaseDB';
 import { Post } from '@/types/database';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
-  const [selectedType, setSelectedType] = useState<'all' | 'story' | 'poem' | 'book-note' | 'weekly-brew'>('all');
+  const [selectedType, setSelectedType] = useState<'all' | 'story' | 'poem' | 'article' | 'book-note' | 'weekly-brew'>('all');
   const [results, setResults] = useState<Post[]>([]);
   const [mounted, setMounted] = useState(false);
 
@@ -82,6 +82,7 @@ export default function SearchPage() {
             {[
               { type: 'all', label: 'All Content' },
               { type: 'story', label: 'Stories' },
+              { type: 'article', label: 'Articles' },
               { type: 'poem', label: 'Poetry' },
               { type: 'book-note', label: 'Book Notes' },
               { type: 'weekly-brew', label: 'Weekly Brews' }
@@ -121,6 +122,9 @@ export default function SearchPage() {
               {results.map((post) => {
                 if (post.type === 'poem') {
                   return <PoemCard key={post.id} poem={post} />;
+                }
+                if (post.type === 'article') {
+                  return <ArticleCard key={post.id} article={post} />;
                 }
                 return <PostCard key={post.id} post={post} />;
               })}
