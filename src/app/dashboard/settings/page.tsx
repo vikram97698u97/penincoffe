@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Settings, Save, Plus, Trash, Book, Calendar, Info, Globe, Award, KeyRound, AlertCircle, CheckCircle, Mail } from 'lucide-react';
-import { updatePassword, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
+import { Settings, Save, Plus, Trash, Book, Calendar, Info, Globe, Award, KeyRound, AlertCircle, CheckCircle, Mail, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { updatePassword, updateEmail, verifyBeforeUpdateEmail, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 import { fdb as db } from '@/lib/firebaseDB';
 import { Settings as SettingsType, TimelineEvent, BookShelfItem, PublicationItem } from '@/types/database';
@@ -16,11 +16,22 @@ export default function SettingsDashboard() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [resetEmailLoading, setResetEmailLoading] = useState(false);
   const [resetEmailSuccess, setResetEmailSuccess] = useState('');
+
+  // Change Admin Auth Email States
+  const [newAuthEmail, setNewAuthEmail] = useState('');
+  const [emailReauthPassword, setEmailReauthPassword] = useState('');
+  const [showEmailReauthPassword, setShowEmailReauthPassword] = useState(false);
+  const [emailUpdateError, setEmailUpdateError] = useState('');
+  const [emailUpdateSuccess, setEmailUpdateSuccess] = useState('');
+  const [emailUpdateLoading, setEmailUpdateLoading] = useState(false);
 
   // General States
   const [siteName, setSiteName] = useState('');
@@ -169,6 +180,81 @@ export default function SettingsDashboard() {
       setResetEmailSuccess(`Demo Mode: Password reset simulation triggered for ${adminEmail}. Check live console if connected.`);
     } finally {
       setResetEmailLoading(false);
+    }
+  };
+
+  const handleChangeAuthEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailUpdateError('');
+    setEmailUpdateSuccess('');
+
+    const targetEmail = newAuthEmail.trim();
+    if (!targetEmail || !targetEmail.includes('@')) {
+      setEmailUpdateError('Please enter a valid email address.');
+      return;
+    }
+
+    setEmailUpdateLoading(true);
+
+    try {
+      if (isFirebaseConfigured && auth?.currentUser) {
+        if (emailReauthPassword) {
+          const credential = EmailAuthProvider.credential(auth.currentUser.email || '', emailReauthPassword);
+          await reauthenticateWithCredential(auth.currentUser, credential);
+        }
+
+        try {
+          if (typeof updateEmail === 'function') {
+            await updateEmail(auth.currentUser, targetEmail);
+          } else if (typeof verifyBeforeUpdateEmail === 'function') {
+            await verifyBeforeUpdateEmail(auth.currentUser, targetEmail);
+          }
+        } catch (err: any) {
+          if (err.code === 'auth/requires-recent-login' && !emailReauthPassword) {
+            setEmailUpdateError('Firebase requires your current password to authorize changing your authentication email address.');
+            setEmailUpdateLoading(false);
+            return;
+          }
+          if (typeof verifyBeforeUpdateEmail === 'function') {
+            await verifyBeforeUpdateEmail(auth.currentUser, targetEmail);
+          } else {
+            throw err;
+          }
+        }
+      }
+
+      if (config) {
+        const updated = {
+          ...config,
+          email: targetEmail
+        } as SettingsType;
+        await db.saveSettings(updated);
+        setConfig(updated);
+        setEmail(targetEmail);
+      }
+
+      setEmailUpdateSuccess(
+        isFirebaseConfigured && auth?.currentUser
+          ? `Admin authentication email successfully updated to ${targetEmail}!`
+          : `Local/Demo Mode: Admin authentication and contact email updated to ${targetEmail}!`
+      );
+      setNewAuthEmail('');
+      setEmailReauthPassword('');
+    } catch (err: any) {
+      console.warn('Auth email update notice:', err?.code || err?.message);
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setEmailUpdateError('Incorrect password entered.');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setEmailUpdateError('This email is already in use by another user account.');
+      } else if (err.code === 'auth/invalid-email') {
+        setEmailUpdateError('Please enter a valid email address.');
+      } else if (err.code === 'auth/requires-recent-login') {
+        setEmailUpdateError('Firebase requires your current password to change auth email. Please enter your password and try again.');
+      } else {
+        setEmailUpdateError(err?.message || 'Failed to update authentication email.');
+      }
+    } finally {
+      setEmailUpdateLoading(false);
     }
   };
 
@@ -860,6 +946,88 @@ export default function SettingsDashboard() {
       {/* SECURITY TAB */}
       {activeTab === 'security' && (
         <div className="space-y-6">
+          {/* Change Auth Email Section */}
+          <form onSubmit={handleChangeAuthEmail} className="bg-cream-dark/20 border border-coffee-light/15 p-6 rounded-lg space-y-5">
+            <div>
+              <h3 className="font-serif text-base font-bold text-coffee-dark flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-terracotta" />
+                <span>Change Admin Auth Email</span>
+              </h3>
+              <p className="text-xs text-coffee-light mt-1">
+                Update the primary email address used for logging into the admin dashboard and system notifications.
+              </p>
+            </div>
+
+            <div className="space-y-4 max-w-md">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-coffee-light block">Current Active Auth Email</label>
+                <input
+                  type="email"
+                  disabled
+                  value={(auth && auth.currentUser && auth.currentUser.email) || config?.email || 'admin@example.com'}
+                  className="w-full px-3 py-2 bg-cream-dark/40 border border-coffee-light/10 rounded text-xs text-coffee-light font-medium cursor-not-allowed"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-coffee-light block">New Auth Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={newAuthEmail}
+                  onChange={(e) => setNewAuthEmail(e.target.value)}
+                  placeholder="newadmin@example.com"
+                  className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-coffee-light block">Current Password (Required for Firebase security)</label>
+                <div className="relative">
+                  <input
+                    type={showEmailReauthPassword ? 'text' : 'password'}
+                    value={emailReauthPassword}
+                    onChange={(e) => setEmailReauthPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2 pr-9 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEmailReauthPassword(!showEmailReauthPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-coffee-light hover:text-coffee-dark focus:outline-none transition-colors"
+                    title={showEmailReauthPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showEmailReauthPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {emailUpdateError && (
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 p-3 rounded">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{emailUpdateError}</span>
+                </div>
+              )}
+
+              {emailUpdateSuccess && (
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 p-3 rounded">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
+                  <span>{emailUpdateSuccess}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={emailUpdateLoading}
+                className="bg-coffee-dark text-cream-light hover:bg-coffee-light transition-colors px-5 py-2.5 rounded text-xs font-bold uppercase tracking-wider flex items-center gap-2 disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                <span>{emailUpdateLoading ? 'Updating Email...' : 'Update Auth Email'}</span>
+              </button>
+            </div>
+          </form>
+
+          {/* Change Password Section */}
           <form onSubmit={handleChangePassword} className="bg-cream-dark/20 border border-coffee-light/15 p-6 rounded-lg space-y-5">
             <div>
               <h3 className="font-serif text-base font-bold text-coffee-dark flex items-center gap-2">
@@ -874,37 +1042,67 @@ export default function SettingsDashboard() {
             <div className="space-y-4 max-w-md">
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-coffee-light block">Current Password</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3 py-2 pr-9 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-coffee-light hover:text-coffee-dark focus:outline-none transition-colors"
+                    title={showCurrentPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-coffee-light block">New Password</label>
-                <input
-                  type="password"
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new strong password"
-                  className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new strong password"
+                    className="w-full px-3 py-2 pr-9 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-coffee-light hover:text-coffee-dark focus:outline-none transition-colors"
+                    title={showNewPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-coffee-light block">Confirm New Password</label>
-                <input
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  className="w-full px-3 py-2 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    className="w-full px-3 py-2 pr-9 bg-cream-light border border-coffee-light/20 rounded focus:outline-none focus:border-terracotta text-xs text-coffee-dark"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-coffee-light hover:text-coffee-dark focus:outline-none transition-colors"
+                    title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               {passwordError && (
@@ -932,6 +1130,7 @@ export default function SettingsDashboard() {
             </div>
           </form>
 
+          {/* Reset Email Section */}
           <div className="bg-cream-dark/20 border border-coffee-light/15 p-6 rounded-lg space-y-4 max-w-md">
             <div>
               <h3 className="font-serif text-sm font-bold text-coffee-dark flex items-center gap-2">
